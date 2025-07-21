@@ -10,6 +10,7 @@ from pydub import AudioSegment
 import urllib.parse
 from dotenv import load_dotenv # <-- 新增這一行
 
+
 # 在應用程式啟動時載入環境變數
 load_dotenv() # <-- 新增這一行，通常放在應用程式的頂部
 
@@ -118,7 +119,7 @@ def get_news_and_audio():
         # 2. Fetch news content
         headers = {'User-Agent': 'Mozilla/5.0'}
         list_url = 'https://www.ettoday.net/news/news-list.htm'
-        res = requests.get(list_url, headers=headers, timeout=10)
+        res = requests.get(list_url, headers=headers, timeout=10, verify=False)
         res.raise_for_status()
         soup = BeautifulSoup(res.text, 'html.parser')
         
@@ -128,14 +129,29 @@ def get_news_and_audio():
         )
         if not news_url: raise HTTPException(status_code=404, detail="News link not found")
 
-        res = requests.get(news_url, headers=headers, timeout=10)
+        res = requests.get(news_url, headers=headers, timeout=10, verify=False)
         res.raise_for_status()
         soup = BeautifulSoup(res.text, 'html.parser')
         
         title = soup.find('h1', class_='title').text.strip()
+        time = soup.find('time').text.strip()
         content_div = soup.find('div', class_='story')
-        paragraphs = [p.get_text(strip=True) for p in content_div.find_all('p') if p.get_text(strip=True)]
-        news_content = [title] + paragraphs
+        paragraphs = content_div.find_all('p')
+        # paragraphs = [p.get_text(strip=True) for p in content_div.find_all('p') if p.get_text(strip=True)]
+        
+        news_content = []
+        news_content.append(title)
+        news_content.append(time)
+
+        for p in paragraphs:
+            for strong in p.find_all('strong'):
+                strong.extract()
+            text = p.get_text(strip=True)
+            if not text:
+                continue
+            news_content.append(text)
+        
+        # news_content = [title] + paragraphs
         
         # 3. Generate audio segments
         audio_segments = []
