@@ -146,7 +146,7 @@ def get_news_and_audio():
                 try:
                     if re.search(r'[a-zA-Z]', seg):
                         out_path = f"temp_audio/segment_{seg_index}.mp3"
-                        gtts.gTTS(text=seg, lang='en').save(out_path)
+                        gTTS(text=seg, lang='en').save(out_path)
                         print(f"🟢 gTTS 成功 ({seg_index})")
                     else:
                         # This will call the placeholder function and likely fail
