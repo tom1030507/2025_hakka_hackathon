@@ -13,6 +13,11 @@
       <pre>{{ error }}</pre>
     </div>
 
+    <div v-if="loading" class="progress-bar-container">
+      <div class="progress-bar" :style="{ width: progress + '%' }"></div>
+      <div class="progress-text">{{ Math.floor(progress) }}%</div>
+    </div>
+
     <div v-if="newsContent.length > 0" class="content-container">
       <div class="news-content">
         <h2>{{ newsContent[0] }}</h2>
@@ -47,6 +52,8 @@ const loading = ref(false);
 const newsContent = ref([]);
 const audioUrl = ref(null);
 const error = ref(null);
+const progress = ref(0); // 新增進度條狀態
+let progressInterval = null; // 用於清除定時器
 
 // Backend server address
 const backendBaseUrl = 'http://127.0.0.1:8000';
@@ -55,11 +62,33 @@ const fullAudioUrl = computed(() => {
   return audioUrl.value ? `${backendBaseUrl}${audioUrl.value}` : null;
 });
 
+const startFakeProgress = () => {
+  progress.value = 0;
+  progressInterval = setInterval(() => {
+    if (progress.value < 90) { // 模擬進度到90%後變慢
+      progress.value += Math.random() * 1; // 每次增加隨機值，速度減慢
+    } else if (progress.value < 99) {
+      progress.value += Math.random() * 0.2; // 接近完成時變慢，速度減慢
+    }
+    if (progress.value > 99) progress.value = 99; // 防止超過99%
+  }, 100); // 每100毫秒更新一次
+};
+
+const stopFakeProgress = () => {
+  clearInterval(progressInterval);
+  progress.value = 100; // 完成時設定為100%
+  // 可以延遲一下再隱藏進度條，讓使用者看到100%
+  setTimeout(() => {
+    progress.value = 0; // 重置進度條
+  }, 500); // 0.5秒後重置
+};
+
 const fetchNewsAndAudio = async () => {
   loading.value = true;
   error.value = null;
   newsContent.value = [];
   audioUrl.value = null;
+  startFakeProgress(); // 開始模擬進度
 
   try {
     const response = await axios.get(`${backendBaseUrl}/api/news_with_audio`);
@@ -76,6 +105,7 @@ const fetchNewsAndAudio = async () => {
     error.value = err.response ? (err.response.data.detail || err.message) : err.message;
     console.error("Error fetching news and audio:", err);
   } finally {
+    stopFakeProgress(); // 停止模擬進度
     loading.value = false;
   }
 };
@@ -206,6 +236,38 @@ h1 {
 .error-message pre {
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+/* 進度條樣式 */
+.progress-bar-container {
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  margin-top: 1rem;
+  overflow: hidden; /* 確保進度條在容器內 */
+  position: relative;
+  height: 25px; /* 進度條高度 */
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #4CAF50; /* 進度條顏色 */
+  width: 0%;
+  border-radius: 5px;
+  text-align: center;
+  line-height: 25px; /* 垂直居中文字 */
+  color: white;
+  transition: width 0.1s ease-out; /* 平滑過渡 */
+}
+
+.progress-text {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  line-height: 25px;
+  color: #333;
+  top: 0;
+  left: 0;
 }
 </style>
 
