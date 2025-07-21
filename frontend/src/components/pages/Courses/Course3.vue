@@ -20,15 +20,18 @@
           {{ paragraph }}
         </p>
       </div>
+    </div>
 
-      <div v-if="audioUrl" class="audio-player-container">
-        <h3>新聞語音</h3>
+    <div v-if="audioUrl" class="audio-player-fixed-bottom">
+      <div class="audio-player-container">
         <audio controls :src="fullAudioUrl" class="audio-player">
           您的瀏覽器不支援音訊播放。
         </audio>
         <a :href="fullAudioUrl" download class="download-link">下載音檔</a>
       </div>
-       <div v-else-if="loading === false && newsContent.length > 0" class="audio-player-container">
+    </div>
+    <div v-else-if="loading === false && newsContent.length > 0" class="audio-player-fixed-bottom">
+      <div class="audio-player-container">
         <p>無法生成音檔，或音檔生成中發生錯誤。</p>
       </div>
     </div>
@@ -87,32 +90,22 @@ const fetchNewsAndAudio = async () => {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   font-family: 'Helvetica Neue', Arial, sans-serif;
+  padding-bottom: 150px; /* 增加底部填充，為固定播放器留出空間 */
 }
 
 .header-controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 2rem; /* 增加一些底部間距 */
+  margin-bottom: 2rem;
 }
 
 h1 {
   color: #333;
-  /* text-align: center; */ /* 移除此行，讓flexbox控制對齊 */
-  margin: 0; /* 移除預設邊距 */
+  margin: 0;
 }
 
-/* 移除原先的p標籤樣式，因為該p標籤已被移除 */
-/* p {
-  color: #666;
-  line-height: 1.6;
-  text-align: center;
-  margin-bottom: 1.5rem;
-} */
-
 .fetch-button {
-  /* display: block; */ /* 移除此行，讓flexbox控制對齊 */
-  /* margin: 0 auto 2rem auto; */ /* 移除此行，讓flexbox控制對齊 */
   padding: 12px 25px;
   font-size: 1rem;
   color: #fff;
@@ -160,10 +153,23 @@ h1 {
   line-height: 1.8;
 }
 
+.audio-player-fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: transparent; /* 完全透明背景 */
+  box-shadow: none; /* 移除陰影 */
+  z-index: 1000;
+  padding: 10px 0;
+}
+
 .audio-player-container {
-  padding: 1.5rem;
-  background-color: #fff;
-  border: 1px solid #ddd;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: transparent; /* 完全透明背景 */
+  border: none; /* 移除邊框 */
   border-radius: 8px;
   text-align: center;
 }
@@ -202,3 +208,4 @@ h1 {
   word-wrap: break-word;
 }
 </style>
+
