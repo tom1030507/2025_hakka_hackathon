@@ -1,13 +1,13 @@
 <template>
   <div class="course-container">
-    <h1>客家新聞語音閱讀</h1>
-    <p>點擊按鈕以讀取最新新聞，並生成語音檔</p>
+    <div class="header-controls">
+      <h1>客家新聞語音閱讀</h1>
+      <button @click="fetchNewsAndAudio" :disabled="loading" class="fetch-button">
+        <span v-if="loading">載入中，請稍候...</span>
+        <span v-else>讀取最新新聞</span>
+      </button>
+    </div>
     
-    <button @click="fetchNewsAndAudio" :disabled="loading" class="fetch-button">
-      <span v-if="loading">載入中，請稍候...</span>
-      <span v-else>讀取最新新聞</span>
-    </button>
-
     <div v-if="error" class="error-message">
       <p>讀取時發生錯誤：</p>
       <pre>{{ error }}</pre>
@@ -80,7 +80,7 @@ const fetchNewsAndAudio = async () => {
 
 <style scoped>
 .course-container {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 2rem auto;
   padding: 2rem;
   background-color: #f9f9f9;
@@ -89,22 +89,30 @@ const fetchNewsAndAudio = async () => {
   font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-h1 {
-  color: #333;
-  text-align: center;
-  margin-bottom: 1rem;
+.header-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem; /* 增加一些底部間距 */
 }
 
-p {
+h1 {
+  color: #333;
+  /* text-align: center; */ /* 移除此行，讓flexbox控制對齊 */
+  margin: 0; /* 移除預設邊距 */
+}
+
+/* 移除原先的p標籤樣式，因為該p標籤已被移除 */
+/* p {
   color: #666;
   line-height: 1.6;
   text-align: center;
   margin-bottom: 1.5rem;
-}
+} */
 
 .fetch-button {
-  display: block;
-  margin: 0 auto 2rem auto;
+  /* display: block; */ /* 移除此行，讓flexbox控制對齊 */
+  /* margin: 0 auto 2rem auto; */ /* 移除此行，讓flexbox控制對齊 */
   padding: 12px 25px;
   font-size: 1rem;
   color: #fff;
