@@ -17,6 +17,7 @@
     <div class="tabs">
       <button @click="showSection('flashcard')" :class="{ active: currentSection === 'flashcard' }">單字卡</button>
       <button @click="showSection('quiz')" :class="{ active: currentSection === 'quiz' }">測驗</button>
+      <button @click="showSection('translate')" :class="{ active: currentSection === 'translate' }">翻譯</button>
     </div>
 
     <!-- Flashcard Section -->
@@ -31,6 +32,54 @@
         <button @click="nextCard">下一張</button>
       </div>
       <p id="progress">第 {{ currentCard + 1 }} / {{ cards.length }} 張</p>
+    </div>
+
+    <!-- Translate Section -->
+    <div v-if="currentSection === 'translate'" id="translate-section">
+      <div id="translate-container">
+        <div class="input-section">
+          <label for="chinese-input" class="input-label">請輸入中文：</label>
+          <textarea 
+            id="chinese-input" 
+            v-model="chineseInput" 
+            placeholder="請輸入要翻譯的中文..."
+            rows="3"
+            @input="onInputChange"
+          ></textarea>
+        </div>
+        
+        <div class="translate-button-section">
+          <button @click="translateText" :disabled="!chineseInput.trim()" class="translate-btn">翻譯成客語</button>
+        </div>
+        
+        <div class="result-section" v-if="translationResult.show">
+          <label class="result-label">客語翻譯：</label>
+          <div id="translation-result">
+            <p class="hakka-text">{{ translationResult.hakka }}</p>
+            <button 
+              @click="playTranslationAudio" 
+              :disabled="!translationResult.audio"
+              class="audio-btn"
+            >🔊 播放客語</button>
+          </div>
+        </div>
+        
+        <div class="history-section" v-if="translationHistory.length > 0">
+          <h3>翻譯記錄</h3>
+          <div class="history-list">
+            <div 
+              v-for="(item, index) in translationHistory" 
+              :key="index" 
+              class="history-item"
+              @click="loadHistoryItem(item)"
+            >
+              <div class="history-chinese">{{ item.chinese }}</div>
+              <div class="history-hakka">{{ item.hakka }}</div>
+            </div>
+          </div>
+          <button @click="clearHistory" class="clear-btn">清除記錄</button>
+        </div>
+      </div>
     </div>
 
     <!-- Quiz Section -->
@@ -106,6 +155,15 @@ const quizIndex = ref(0);
 const quizScore = ref(0);
 const quizOptions = ref([]);
 const quizAnswered = ref(false);
+
+// Translation section variables
+const chineseInput = ref('');
+const translationResult = ref({
+  show: false,
+  hakka: '',
+  audio: null
+});
+const translationHistory = ref([]);
 
 function loadCard() {
   if (currentCard.value < 0) currentCard.value = 0;
@@ -187,6 +245,77 @@ function showSection(section) {
   }
 }
 
+// Translation functions
+function onInputChange() {
+  if (translationResult.value.show) {
+    translationResult.value.show = false;
+  }
+}
+
+function translateText() {
+  if (!chineseInput.value.trim()) return;
+  
+  // 模擬翻譯功能 - 這裡之後可以替換成實際的翻譯邏輯
+  const inputText = chineseInput.value.trim();
+  
+  // 檢查是否在現有單字卡中有匹配的翻譯
+  const foundCard = cards.value.find(card => card.chinese === inputText);
+  
+  if (foundCard) {
+    translationResult.value = {
+      show: true,
+      hakka: foundCard.hakka,
+      audio: foundCard.audio
+    };
+  } else {
+    // 如果沒找到，顯示預設訊息
+    translationResult.value = {
+      show: true,
+      hakka: '抱歉，暫時無法翻譯此詞彙',
+      audio: null
+    };
+  }
+  
+  // 添加到翻譯記錄
+  const historyItem = {
+    chinese: inputText,
+    hakka: translationResult.value.hakka,
+    audio: translationResult.value.audio
+  };
+  
+  // 避免重複記錄
+  const existingIndex = translationHistory.value.findIndex(item => item.chinese === inputText);
+  if (existingIndex !== -1) {
+    translationHistory.value.splice(existingIndex, 1);
+  }
+  
+  translationHistory.value.unshift(historyItem);
+  
+  // 限制記錄數量
+  if (translationHistory.value.length > 10) {
+    translationHistory.value = translationHistory.value.slice(0, 10);
+  }
+}
+
+function playTranslationAudio() {
+  if (translationResult.value.audio) {
+    playAudio(translationResult.value.audio);
+  }
+}
+
+function loadHistoryItem(item) {
+  chineseInput.value = item.chinese;
+  translationResult.value = {
+    show: true,
+    hakka: item.hakka,
+    audio: item.audio
+  };
+}
+
+function clearHistory() {
+  translationHistory.value = [];
+}
+
 onMounted(() => {
   loadCard();
 });
@@ -224,7 +353,7 @@ h1 {
   font-weight: bold;
 }
 
-#card, #quiz-section {
+#card, #quiz-section, #translate-section {
   border: 2px solid #e0e0e0;
   border-radius: 10px;
   padding: 1.5em 1em;
@@ -271,5 +400,146 @@ button:disabled {
   width: 70%;
   max-width: 320px;
   margin: 0.4em auto;
+}
+
+/* Translation Section Styles */
+#translate-container {
+  max-width: 100%;
+}
+
+.input-section {
+  margin-bottom: 1.5em;
+}
+
+.input-label, .result-label {
+  display: block;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5em;
+  font-size: 1.1rem;
+}
+
+#chinese-input {
+  width: 100%;
+  padding: 0.8em;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+#chinese-input:focus {
+  outline: none;
+  border-color: #d6336c;
+}
+
+.translate-button-section {
+  text-align: center;
+  margin-bottom: 1.5em;
+}
+
+.translate-btn {
+  background-color: #d6336c;
+  color: white;
+  font-size: 1.1rem;
+  padding: 0.8em 2em;
+  border-radius: 8px;
+}
+
+.translate-btn:hover:not(:disabled) {
+  background-color: #b8295a;
+}
+
+.translate-btn:disabled {
+  background-color: #cccccc;
+  color: #888;
+}
+
+.result-section {
+  margin-bottom: 1.5em;
+}
+
+#translation-result {
+  background-color: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.2em;
+  text-align: center;
+}
+
+.hakka-text {
+  font-size: 1.4rem;
+  color: #2c5aa0;
+  font-weight: bold;
+  margin: 0 0 0.8em 0;
+}
+
+.audio-btn {
+  background-color: #28a745;
+  color: white;
+  font-size: 1rem;
+  padding: 0.6em 1.5em;
+}
+
+.audio-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.history-section {
+  margin-top: 2em;
+}
+
+.history-section h3 {
+  color: #555;
+  font-size: 1.2rem;
+  margin-bottom: 1em;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5em;
+}
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1em;
+}
+
+.history-item {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.8em;
+  margin-bottom: 0.5em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.history-item:hover {
+  background-color: #e9ecef;
+}
+
+.history-chinese {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.3em;
+}
+
+.history-hakka {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.clear-btn {
+  background-color: #dc3545;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.5em 1.2em;
+}
+
+.clear-btn:hover {
+  background-color: #c82333;
 }
 </style>
