@@ -1,5 +1,12 @@
 <template>
-  <div class="course-layout" v-if="courses.length > 0">
+  <div class="initial-screen" v-if="!showContent">
+    <div class="input-container">
+      <input type="text" v-model="inputValue" placeholder="請輸入內容" class="input-field" />
+      <button @click="submitInput" class="submit-button">送出</button>
+    </div>
+  </div>
+
+  <div class="course-layout" v-else-if="courses.length > 0">
     <!-- Left Sidebar for Outline -->
     <aside class="outline-sidebar">
       <h3>課程大綱</h3>
@@ -72,6 +79,8 @@ const courses = ref([]);
 const currentPage = ref(0); // 0-indexed
 const userAnswers = ref([]);
 const submitted = ref(false);
+const showContent = ref(false); // New ref to control content visibility
+const inputValue = ref(''); // New ref for input field
 
 onMounted(async () => {
   try {
@@ -132,9 +141,62 @@ const goToPage = (index) => {
 const submitQuiz = () => {
   submitted.value = true;
 };
+
+const submitInput = () => {
+  showContent.value = true;
+  // You can also do something with inputValue here, e.g., send it to a backend
+  console.log('Input submitted:', inputValue.value);
+};
 </script>
 
 <style scoped>
+.initial-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.input-field {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 300px;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.submit-button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
 .course-layout {
   display: flex;
   height: 100vh; /* Full height layout */
@@ -286,8 +348,7 @@ const submitQuiz = () => {
   background-color: #fff;
   border-radius: 5px;
   border: 1px solid #ddd;
-}
-
+}
 .options {
   margin-top: 10px;
 }
