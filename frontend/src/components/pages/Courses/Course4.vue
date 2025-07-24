@@ -75,7 +75,7 @@ const submitted = ref(false);
 
 onMounted(async () => {
   try {
-    const response = await fetch('/data/page1.json');
+    const response = await fetch('/data/response.json');
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
