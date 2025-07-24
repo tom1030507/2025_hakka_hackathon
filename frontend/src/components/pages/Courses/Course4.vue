@@ -1,56 +1,65 @@
 <template>
-  <div class="course-container" v-if="currentCourse">
-    <!-- Page Navigation -->
-    <div class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 0">上一章</button>
-      <span>第 {{ currentPage + 1 }} / {{ courses.length }} 章</span>
-      <button @click="nextPage" :disabled="currentPage === courses.length - 1">下一章</button>
-    </div>
+  <div class="course-layout" v-if="courses.length > 0">
+    <!-- Left Sidebar for Outline -->
+    <aside class="outline-sidebar">
+      <h3>課程大綱</h3>
+      <ul>
+        <li
+          v-for="(outline, index) in courseOutlines"
+          :key="index"
+          @click="goToPage(index)"
+          :class="{ 'active': currentPage === index }"
+          class="outline-item"
+        >
+          {{ outline.title }}
+        </li>
+      </ul>
+    </aside>
 
-    <!-- Course Content -->
-    <div class="prose" v-html="renderedMarkdown"></div>
+    <!-- Right Main Content -->
+    <main class="course-main-content">
+      <div class="course-container" v-if="currentCourse">
 
-    <!-- Quiz Section -->
-    <div class="quiz-container" v-if="currentCourse.output && currentCourse.output.quiz_questions">
-      <h2>章節測驗</h2>
-      <div v-for="(quiz, index) in currentCourse.output.quiz_questions" :key="quiz.question_number" class="quiz-question">
-        <p><strong>第 {{ quiz.question_number }} 題：</strong>{{ quiz.question_text }}</p>
-        <div class="options">
-          <div v-for="(optionText, optionKey) in quiz.options" :key="optionKey" class="option">
-            <input
-              type="radio"
-              :id="`p${currentPage}_q${quiz.question_number}_${optionKey}`"
-              :name="`page${currentPage}_question_${quiz.question_number}`"
-              :value="optionKey"
-              v-model="userAnswers[index]"
-              :disabled="submitted"
-            />
-            <label :for="`p${currentPage}_q${quiz.question_number}_${optionKey}`">{{ optionKey }}: {{ optionText }}</label>
+        <!-- Course Content -->
+        <div class="prose" v-html="renderedMarkdown"></div>
+
+        <!-- Quiz Section -->
+        <div class="quiz-container" v-if="currentCourse.output && currentCourse.output.quiz_questions">
+          <h2>章節測驗</h2>
+          <div v-for="(quiz, index) in currentCourse.output.quiz_questions" :key="quiz.question_number" class="quiz-question">
+            <p><strong>第 {{ quiz.question_number }} 題：</strong>{{ quiz.question_text }}</p>
+            <div class="options">
+              <div v-for="(optionText, optionKey) in quiz.options" :key="optionKey" class="option">
+                <input
+                  type="radio"
+                  :id="`p${currentPage}_q${quiz.question_number}_${optionKey}`"
+                  :name="`page${currentPage}_question_${quiz.question_number}`"
+                  :value="optionKey"
+                  v-model="userAnswers[index]"
+                  :disabled="submitted"
+                />
+                <label :for="`p${currentPage}_q${quiz.question_number}_${optionKey}`">{{ optionKey }}: {{ optionText }}</label>
+              </div>
+            </div>
+            <div v-if="submitted" class="feedback" :class="{
+              'correct': userAnswers[index] === quiz.correct_answer,
+              'incorrect': userAnswers[index] !== quiz.correct_answer
+            }">
+              <p v-if="userAnswers[index] === quiz.correct_answer"><strong>正確！</strong></p>
+              <p v-else>
+                <strong>答錯了。</strong>
+                正確答案是：{{ quiz.correct_answer }}
+              </p>
+              <p class="explanation"><strong>解析：</strong>{{ quiz.explanation }}</p>
+            </div>
           </div>
+          <button @click="submitQuiz" :disabled="submitted" class="submit-btn">提交答案</button>
         </div>
-        <div v-if="submitted" class="feedback" :class="{
-          'correct': userAnswers[index] === quiz.correct_answer,
-          'incorrect': userAnswers[index] !== quiz.correct_answer
-        }">
-          <p v-if="userAnswers[index] === quiz.correct_answer"><strong>正確！</strong></p>
-          <p v-else>
-            <strong>答錯了。</strong>
-            正確答案是：{{ quiz.correct_answer }}
-          </p>
-          <p class="explanation"><strong>解析：</strong>{{ quiz.explanation }}</p>
-        </div>
+
       </div>
-      <button @click="submitQuiz" :disabled="submitted" class="submit-btn">提交答案</button>
-    </div>
-
-     <!-- Page Navigation at the bottom -->
-    <div class="pagination bottom-pagination">
-      <button @click="prevPage" :disabled="currentPage === 0">上一章</button>
-      <button @click="nextPage" :disabled="currentPage === courses.length - 1">下一章</button>
-    </div>
-
+    </main>
   </div>
-  <div v-else>
+  <div v-else class="loading-container">
     <p>正在載入課程資料...</p>
   </div>
 </template>
@@ -64,7 +73,6 @@ const currentPage = ref(0); // 0-indexed
 const userAnswers = ref([]);
 const submitted = ref(false);
 
-// Fetch all course data once
 onMounted(async () => {
   try {
     const response = await fetch('/data/page1.json');
@@ -73,19 +81,25 @@ onMounted(async () => {
     }
     const data = await response.json();
     courses.value = data;
-    // Initialize answers for the first page
     resetQuizState();
   } catch (error) {
     console.error('Failed to fetch course data:', error);
   }
 });
 
-// Get the current course based on currentPage
 const currentCourse = computed(() => {
   return courses.value.length > 0 ? courses.value[currentPage.value] : null;
 });
 
-// Render markdown for the current course
+const courseOutlines = computed(() => {
+  return courses.value.map(course => {
+    const titleMatch = course.text.match(/^#\s*(.*)/);
+    return {
+      title: titleMatch ? titleMatch[1] : '未命名章節'
+    };
+  });
+});
+
 const renderedMarkdown = computed(() => {
   if (currentCourse.value && currentCourse.value.text) {
     marked.setOptions({ breaks: true });
@@ -94,7 +108,6 @@ const renderedMarkdown = computed(() => {
   return '';
 });
 
-// Function to reset quiz state, to be called when page changes
 const resetQuizState = () => {
   submitted.value = false;
   if (currentCourse.value && currentCourse.value.output && currentCourse.value.output.quiz_questions) {
@@ -104,24 +117,16 @@ const resetQuizState = () => {
   }
 };
 
-// Watch for page changes and reset the quiz
 watch(currentPage, () => {
   resetQuizState();
-  // Scroll to top of the course container
-  document.querySelector('.course-container')?.scrollTo(0, 0);
+  const mainContent = document.querySelector('.course-main-content');
+  if (mainContent) {
+    mainContent.scrollTo(0, 0);
+  }
 });
 
-
-const nextPage = () => {
-  if (currentPage.value < courses.value.length - 1) {
-    currentPage.value++;
-  }
-};
-
-const prevPage = () => {
-  if (currentPage.value > 0) {
-    currentPage.value--;
-  }
+const goToPage = (index) => {
+  currentPage.value = index;
 };
 
 const submitQuiz = () => {
@@ -130,61 +135,106 @@ const submitQuiz = () => {
 </script>
 
 <style scoped>
-.course-container {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+.course-layout {
+  display: flex;
+  height: 100vh; /* Full height layout */
+  max-width: 1400px;
   margin: 0 auto;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  background-color: #f0f2f5;
+}
+
+.outline-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background-color: #fff;
   padding: 20px;
-  max-width: 800px;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+}
+
+.outline-sidebar h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 1.2em;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.outline-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.outline-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s, color 0.2s;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 0.95em;
+}
+
+.outline-item:hover {
+  background-color: #e9ecef;
+}
+
+.outline-item.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+.course-main-content {
+  flex-grow: 1;
+  overflow-y: auto; /* Allows content to scroll independently */
+  padding: 20px 40px;
+}
+
+/* Custom Scrollbar for Webkit browsers */
+.course-main-content::-webkit-scrollbar {
+  width: 12px; /* Makes the scrollbar wider */
+}
+
+.course-main-content::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light grey track */
+  border-radius: 10px;
+}
+
+.course-main-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1; /* A visible grey thumb */
+  border-radius: 10px;
+  border: 2px solid #f1f1f1; /* Creates a padding effect */
+}
+
+.course-main-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8; /* Darker thumb on hover */
+}
+
+.course-container {
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto; /* Center the container within the main content area */
+  padding-bottom: 20vh; /* Add significant space at the bottom */
 }
 
-.pagination {
+.loading-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.pagination button {
-  background-color: #007bff;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.pagination button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.pagination button:not(:disabled):hover {
-  background-color: #0056b3;
-}
-
-.pagination span {
-  font-weight: bold;
-  color: #555;
-}
-
-.bottom-pagination {
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #ddd;
-  border-bottom: none;
+  height: 100vh;
 }
 
 .prose {
-  line-height: 1.6;
+  line-height: 1.7;
+  color: #333;
 }
 
 .prose :deep(h1), .prose :deep(h2), .prose :deep(h3) {
