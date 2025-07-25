@@ -7,12 +7,8 @@
         handleResetPlan: Function
     })
 
-    const workoutTypes = ['Push', 'Pull', 'Legs']
-    const dates = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() + i);
-        return date.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
-    });
+
+    
 </script>
 
 <template>
@@ -20,7 +16,7 @@
         <button @click="() => handleSelectWorkout(workoutIdx)" :key="workoutIdx" v-for="(workout, workoutIdx) in Object.keys(workoutProgram)"  class="card-button plan-card">
             <div>
                 <p>Day {{ workoutIdx < 9 ? '0' + (workoutIdx + 1) : workoutIdx + 1 }}</p>
-                <p>{{ dates[workoutIdx] }}</p>
+                
                 <i class="fa-solid fa-dumbbell" v-if="workoutIdx % 3 == 0" ></i>
                 <i class='fa-solid fa-weight-hanging' v-if="workoutIdx % 3 == 1"></i>
                 <i class="fa-solid fa-bolt" v-if="workoutIdx % 3 == 2"></i>
