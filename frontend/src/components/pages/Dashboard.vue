@@ -1,17 +1,20 @@
 <script setup>
-    import { ref, onMounted, onUnmounted, computed } from 'vue'
+    import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
     import Grid from '../Grid.vue'
 
-    import { gymHealthFacts } from '../../utils'
+    import { Facts } from '../../utils'
 
     const props = defineProps({
         handleSelectWorkout: Function,
-        firstIncompleteWorkoutIndex: Number
+        firstIncompleteWorkoutIndex: Number,
+        handleResetPlan: Function,
+        sevenDayCompletionRate: Number,
+        structuredDailyActivities: Object
     })
     
     // generate a random whole integer number between 0 and array length - 1
-    const randomNumber = Math.floor(Math.random() * gymHealthFacts.length)
-    const todaysFact = gymHealthFacts[randomNumber]
+    const randomNumber = Math.floor(Math.random() * Facts.length)
+    const todaysFact = Facts[randomNumber]
     const today = ref('')
     let timerId = null;
 
@@ -33,6 +36,15 @@
         }, msUntilMidnight);
     }
 
+    const incompleteAllActivities = computed(() => {
+        let all = [];
+        for (const dayIndex in props.structuredDailyActivities) {
+            const activities = props.structuredDailyActivities[dayIndex];
+            all = all.concat(activities.morning, activities.afternoon, activities.evening);
+        }
+        return all.filter(activity => !activity.completed);
+    });
+
     onMounted(() => {
         updateDate();
         scheduleDateUpdate();
@@ -45,27 +57,9 @@
         }
     })
 
-    const sevenDayActivities = computed(() => {
-      let all = [];
-      for (let i = 0; i < 7; i++) {
-        const savedActivities = localStorage.getItem(`dailyActivities_${i}`);
-        if (savedActivities) {
-          const dayActivities = JSON.parse(savedActivities);
-          all = all.concat(dayActivities.morning, dayActivities.afternoon, dayActivities.evening);
-        }
-      }
-      return all;
-    });
-
-    const sevenDayCompletionRate = computed(() => {
-      if (sevenDayActivities.value.length === 0) return 0;
-      const completedCount = sevenDayActivities.value.filter(a => a.completed).length;
-      return Math.round((completedCount / sevenDayActivities.value.length) * 100);
-    });
-
     const circumference = 2 * Math.PI * 90; // 2 * pi * r
     const strokeOffset = computed(() => {
-      return circumference - (sevenDayCompletionRate.value / 100) * circumference;
+      return circumference - (props.sevenDayCompletionRate / 100) * circumference;
     });
 </script>
 
@@ -73,7 +67,7 @@
     <section id="dashboard">
         <div class="dashboard-content">
             <div class="card tip-container">
-                <h2>Welcome Smoldier</h2>
+                <h2>讀書計畫</h2>
                 <p>{{ today }}</p>
                 <div>
                     <p class="tip"><strong>Daily Tip</strong><br/>{{ todaysFact }}</p>
@@ -82,7 +76,7 @@
             <Grid v-bind="props"  />
         </div>
         <aside class="progress-container">
-            <h3>7天完成率</h3>
+            <!-- <h3>7天完成率</h3> -->
             <svg class="progress-ring" width="200" height="200">
                 <circle class="progress-ring__circle-bg" stroke="#eee" stroke-width="15" fill="transparent" r="90" cx="100" cy="100"/>
                 <circle class="progress-ring__circle" 
@@ -94,8 +88,19 @@
                         cy="100"
                         :stroke-dasharray="circumference"
                         :stroke-dashoffset="strokeOffset" />
-                <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="progress-text">{{ sevenDayCompletionRate }}%</text>
+                <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="progress-text">{{ props.sevenDayCompletionRate }}%</text>
             </svg>
+            <div class="todo-list-container card">
+                <h4>所有待辦 (未完成)</h4>
+                <ul v-if="incompleteAllActivities.length > 0">
+                    <li v-for="(activity, index) in incompleteAllActivities" :key="index">
+                        <span>{{ activity.text }}</span>
+                    </li>
+                </ul>
+                <p v-else>目前沒有未完成的待辦事項！</p>
+                
+                
+            </div>
         </aside>
     </section>
 </template>
@@ -132,7 +137,8 @@
 
     .tip-container {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 2rem;
+        height: 240px; 
     }
 
     @media (min-width: 640px) {
@@ -151,5 +157,61 @@
         font-size: 2rem;
         font-weight: bold;
         fill: var(--color-text);
+    }
+
+    .todo-list-container {
+        width: 100%;
+        margin-top: 2rem;
+        padding: 1rem;
+    }
+
+    .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+    }
+
+    .add-task {
+    display: flex;
+    gap: 0.5rem;
+    }
+
+    .add-task-container {
+        margin-top: 0.5rem;
+    }
+
+    ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    }
+
+    li {
+    background-color: var(--background-muted);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    }
+
+    li.completed span {
+    text-decoration: line-through;
+    color: #888;
+    }
+
+    .complete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2rem;
+    color: #888;
+    }
+
+    .complete-btn:hover {
+    color: var(--color-link);
     }
 </style>

@@ -9,7 +9,7 @@
 
     const workoutTypes = ['Push', 'Pull', 'Legs']
     const dates = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date();
+        const date = new Date(2025, 6, 25); // Fixed start date: July 25, 2025
         date.setDate(date.getDate() + i);
         return date.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' });
     });
@@ -27,7 +27,7 @@
             </div>
             
         </button>
-        <button :disabled="firstIncompleteWorkoutIndex != -1" @click="handleResetPlan" class="card-button plan-card-reset">
+        <button @click="handleResetPlan" class="card-button plan-card-reset">
            <p>Reset</p>
            <i class="fa-solid fa-rotate-left"></i>
         </button>
@@ -38,7 +38,8 @@
     #grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1rem;
+        gap: 1rem 2rem;
+        padding-left: 1rem;
     }
 
     #grid button {
