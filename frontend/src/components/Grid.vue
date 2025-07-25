@@ -27,7 +27,7 @@
             </div>
             
         </button>
-        <button :disabled="firstIncompleteWorkoutIndex != -1" @click="handleResetPlan" class="card-button plan-card-reset">
+        <button @click="handleResetPlan" class="card-button plan-card-reset">
            <p>Reset</p>
            <i class="fa-solid fa-rotate-left"></i>
         </button>
@@ -39,11 +39,11 @@
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 1rem 2rem;
-        padding-left: 6rem;
+        padding-left: 1rem;
     }
 
     #grid button {
-        width: 400%;
+        width: 100%;
     }
 
     #grid button:disabled {

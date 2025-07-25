@@ -6,7 +6,9 @@
 
     const props = defineProps({
         handleSelectWorkout: Function,
-        firstIncompleteWorkoutIndex: Number
+        firstIncompleteWorkoutIndex: Number,
+        handleResetPlan: Function,
+        sevenDayCompletionRate: Number
     })
     
     // generate a random whole integer number between 0 and array length - 1
@@ -45,27 +47,9 @@
         }
     })
 
-    const sevenDayActivities = computed(() => {
-      let all = [];
-      for (let i = 0; i < 7; i++) {
-        const savedActivities = localStorage.getItem(`dailyActivities_${i}`);
-        if (savedActivities) {
-          const dayActivities = JSON.parse(savedActivities);
-          all = all.concat(dayActivities.morning, dayActivities.afternoon, dayActivities.evening);
-        }
-      }
-      return all;
-    });
-
-    const sevenDayCompletionRate = computed(() => {
-      if (sevenDayActivities.value.length === 0) return 0;
-      const completedCount = sevenDayActivities.value.filter(a => a.completed).length;
-      return Math.round((completedCount / sevenDayActivities.value.length) * 100);
-    });
-
     const circumference = 2 * Math.PI * 90; // 2 * pi * r
     const strokeOffset = computed(() => {
-      return circumference - (sevenDayCompletionRate.value / 100) * circumference;
+      return circumference - (props.sevenDayCompletionRate / 100) * circumference;
     });
 </script>
 
@@ -94,7 +78,7 @@
                         cy="100"
                         :stroke-dasharray="circumference"
                         :stroke-dashoffset="strokeOffset" />
-                <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="progress-text">{{ sevenDayCompletionRate }}%</text>
+                <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="progress-text">{{ props.sevenDayCompletionRate }}%</text>
             </svg>
         </aside>
     </section>

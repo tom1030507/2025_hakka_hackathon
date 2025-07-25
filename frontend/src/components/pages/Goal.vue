@@ -2,7 +2,8 @@
 import { ref, computed, onMounted, watch } from 'vue';
 
 const props = defineProps({
-  dayIndex: String
+  dayIndex: String,
+  loadDailyActivities: Function
 });
 
 const currentDayIndex = computed(() => parseInt(props.dayIndex));
@@ -70,6 +71,9 @@ onMounted(() => {
 // Watch for changes in activities and save to localStorage
 watch(activities, (newActivities) => {
   localStorage.setItem(`dailyActivities_${currentDayIndex.value}`, JSON.stringify(newActivities));
+  if (props.loadDailyActivities) {
+    props.loadDailyActivities();
+  }
 }, { deep: true });
 
 // Watch for dayIndex changes and reload activities
