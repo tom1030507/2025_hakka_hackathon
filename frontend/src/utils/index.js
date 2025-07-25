@@ -92,62 +92,15 @@ export const workoutProgram = {
     }
 }
 
-
-export const exerciseDescriptions = {
-    "Around the worlds": "Hold a stick with a double shoulder-width grip. Start with the stick at your hips, then lift it over your head, keeping your arms straight, and lower it behind your back as far down as comfortable. Then slowly reverse the motion to return to the starting position.",
-    "Scapula pushups": "Begin in a high plank position. Keep your arms straight and only move your shoulder blades, bringing them together and apart in a controlled manner, as you lower your body towards the ground, and then raise it back up. Hold a kneeling position if the plank is too challenging.",
-    "Wall bodyweight rows": "Stand a foot away from a wall, lean back, and with your elbows by your sides and hands pointing forward of your body, press your body off the wall using your elbows while engaging your back muscles.",
-    "leaning rear delt holds": "Stand with your back against a wall, elbows at shoulder level, hands to the sky, and thumbs facing your ears. Engage your rear delts to press your back off the wall using your elbows.",
-    "Scapula pull ups": "Hang from a pull-up bar or lat pull down machine with straight arms. Without bending your elbows, engage your shoulder blades to lift your body slightly, then release back to hanging position.",
-    "Glute bridges": "Lie on your back with knees bent and feet on the ground. Lift your hips by contracting your glutes, creating a straight line from shoulders to knees.",
-    "Bodyweight squats": "Perform a regular squat, but pause for 2-3 seconds at the bottom before standing back up. Feet shoulder width apart.",
-    "Bodyweight RDLs": "Stand on one leg, hinge at the hips to lower your torso to horizontal while extending the other leg behind you, and return to a standing position by engaging your hamstrings and glutes. Microbend the leg still on the ground as you complete the exercise.",
-
-    "Barbell bench press": "Lie on a flat bench and lower a barbell to your chest, flaring your elbows between a 45 - 60 degree angle, then press it back up using your chest muscles. Hands should be 1.5 times your shoulder width apart.",
-    "Incline dumbbell press": "Lie on an incline bench and press dumbbells upwards, focusing on the upper part of your chest.",
-    "Dumbbell chest flies": "Lie on a flat bench with dumbbells held towards the sky. Then slowly lower them to either side, open your arms wide as if you were about to hug a large tree, and then bring them together over your chest in a hugging motion.",
-    "Cable crossover press": "Using a cable machine with handles, press the cables together in front of you, slight crossing your hands over one-another at the end of the motion, engaging your chest muscles.",
-    "Cable chest flies": "Stand between two cable attachments, facing forwards of the machines, and perform chest flies by bringing the handles together in front of your chest, focusing on the squeeze.",
-    "Pushups": "Start in a plank position with your hands slightly wider than shoulder-width, lower your chest to the ground, elbows flaring to a 45 - 60 degree angle, and push back up.",
-    "Dips": "Using parallel bars, lower your body by bending your elbows and push back up, focusing on triceps and chest.",
-    "Cable rope pushdown": "Using a cable machine with a rope attachment, extend your arms downward to straighten your elbows, targeting your triceps.",
-    "Dumbbell skull crushers": "Lie on a bench, holding dumbbells with arms extended. Bend your elbows to lower the weights toward your forehead, then extend your arms back up.",
-    "Unilateral cable pushdown": "Using a cable machine, push the handle downwards with one hand, keeping your elbow close to your body and extending the tricep fully.",
-
-    "Lat pull down": "Sit at a lat pulldown machine, pull the bar down to your chest while engaging your lats, and return to the starting position.",
-    "Cable row": "Sit at a cable machine and pull the handle towards your torso while keeping your back straight, focusing on squeezing your shoulder blades together.",
-    "Unilateral dumbbell row": "Place one hand on a bench, hinge at the hips, and row a dumbbell with the other hand by pulling it towards your hip, focusing on your lats.",
-    "Chest supported dumbbell row": "Lie face down on an incline bench and perform rows with dumbbells, focusing on squeezing your shoulder blades together.",
-    "Dumbbell side raises": "Hold dumbbells at your sides and raise them outward until your arms are parallel to the floor, targeting your shoulders.",
-    "Rear delt flies": "Bend over with a slight bend in your knees, raise dumbbells (or cables) out to the sides in a flying motion, targeting your rear deltoids.",
-    "Cable bar shrugs": "Using a cable machine, shrug your shoulders upwards while keeping your arms straight, targeting your traps.",
-    "Overhand cable curl": "Using a cable machine with a bar attachment, perform bicep curls with an overhand grip, targeting your forearms and biceps.",
-    "Hammer grip dumbbell curl": "Hold dumbbells with a neutral grip (palms facing inward) and perform bicep curls by bending your elbows.",
-    "Alternating dumbbell curl": "Hold dumbbells in both hands and alternate curling one dumbbell at a time, focusing on bicep contraction.",
-
-    "Barbell squat": "Place a barbell across your upper back, squat down by bending your hips and knees, and then stand back up, keeping your chest lifted.",
-    "Leg press": "Sit on a leg press machine and push the platform away from your body by extending your legs, then return to the starting position.",
-    "Goblet squat": "Hold a dumbbell or kettlebell close to your chest and perform a squat, keeping your torso upright.",
-    "Hip thrust": "Rest your upper back on a bench, place a barbell or weight over your hips, and push your hips upwards by contracting your glutes.",
-    "Bulgarian split squat": "Place one foot on a bench behind you and squat with your front leg, keeping your torso upright.",
-    "Unilateral RDLs": "Hold a dumbbell in one hand, stand on the opposite leg, and hinge at the hips to lower the dumbbell toward the ground. Return to standing by engaging your hamstrings.",
-    "Romanian deadlifts": "Hold a barbell or dumbbells with straight arms, hinge at the hips to lower the weights while keeping your back straight, then return to a standing position.",
-    "Walking lunges": "Take a step forward and lower into a lunge, then step forward with the other leg and repeat, walking in a straight line.",
-    "Leg extension": "Sit on a leg extension machine and extend your legs until they are straight, focusing on your quadriceps.",
-    "Hamstring curl": "Using a leg curl machine, curl your legs toward your glutes to engage the hamstrings, then return to the starting position.",
-    "Calf raises": "Stand on the Smith machine with the bar on your shoulders, or in a leg press with your legs almost straight, raise your heels to engage your calves, and then lower them back down.",
-    "Good girls / bad girls": "Using the adductor/abductor machine, move your legs together (adductor) or apart (abductor) to target the inner and outer thighs.",
-}
-
-export const gymHealthFacts = [
-    "Getting 7–9 hours of sleep supports muscle recovery and hormone balance.",
-    "Eating enough protein (1.6–2.2g per kg body weight) helps with muscle repair and growth.",
-    "Staying hydrated improves workout performance and aids nutrient delivery.",
-    "Moderate caffeine use can boost focus, strength, and endurance during workouts.",
-    "Healthy fats support hormone production and long-term energy levels.",
-    "Fiber-rich foods support digestion and help maintain a lean physique.",
-    "Daily walking improves cardiovascular health and aids recovery on rest days.",
-    "Meditation or breathwork can reduce stress and improve recovery and focus.",
-    "A proper warm-up increases blood flow and reduces injury risk.",
-    "Skipping rest days can lead to overtraining, fatigue, and stalled progress."
+export const Facts = [
+    "設定明確的學習目標： 在開始閱讀前，先想清楚這次學習的目標是什麼？是理解一個新概念，還是準備一場考試？明確的目標能讓你更有方向性地閱讀，並在閱讀過程中保持專注。",
+    "預習與概覽： 在深入閱讀前，快速瀏覽書籍或文章的目錄、標題、副標題、引言和結語。這能幫助你對內容有個初步的認識，建立整體的框架，讓後續的細讀更有條理。",
+    "主動閱讀與提問： 不要只是被動地接收資訊。在閱讀過程中，不斷向自己提問，例如：「這段話的重點是什麼？」「我有哪些疑問？」「這與我已知的事物有何關聯？」主動思考能加深理解。",
+    "做筆記與重點標記： 在閱讀時，用自己的話將重點摘錄下來，或用螢光筆標記關鍵字句。筆記不僅能幫助你整理思緒，也是日後複習的重要依據。你可以嘗試康乃爾筆記法或心智圖等不同方式。",
+    "間歇性學習與番茄工作法： 長時間不間斷的學習容易導致疲勞和效率下降。嘗試將學習時間劃分為短暫的區塊（例如25分鐘），中間休息5分鐘，這就是番茄工作法。這種方式能提升專注力並保持學習效率。",
+    "定期複習與回顧： 遺忘是學習的自然現象。為了鞏固記憶，務必定期複習所學內容。你可以利用間隔重複法，在不同時間點複習，確保知識牢固。",
+    "解釋給別人聽： 如果你能將所學知識用自己的話清晰地解釋給另一個人聽，這表示你已經真正理解了。找不到對象時，也可以想像自己在對空氣解釋，或對著鏡子練習。",
+    "將新知識與舊知識連結： 人腦更傾向於記憶有意義、有關聯的資訊。嘗試將新學到的知識與你已有的知識結構連結起來，建立更多聯結點，有助於深化理解和記憶。",
+    "多感官學習： 不要只依賴視覺。嘗試運用多種感官來學習，例如大聲朗讀、製作圖表、聽有聲書或觀看相關影片。不同的輸入方式能刺激大腦不同區域，加深記憶。",
+    "創造有利的學習環境： 選擇一個安靜、整潔且光線充足的環境來學習。減少手機、社交媒體等干擾，保持身心放鬆，有助於提高專注度和學習效率。"
 ]

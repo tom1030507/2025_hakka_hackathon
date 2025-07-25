@@ -2,7 +2,7 @@
     import { ref, onMounted, onUnmounted, computed } from 'vue'
     import Grid from '../Grid.vue'
 
-    import { gymHealthFacts } from '../../utils'
+    import { Facts } from '../../utils'
 
     const props = defineProps({
         handleSelectWorkout: Function,
@@ -10,8 +10,8 @@
     })
     
     // generate a random whole integer number between 0 and array length - 1
-    const randomNumber = Math.floor(Math.random() * gymHealthFacts.length)
-    const todaysFact = gymHealthFacts[randomNumber]
+    const randomNumber = Math.floor(Math.random() * Facts.length)
+    const todaysFact = Facts[randomNumber]
     const today = ref('')
     let timerId = null;
 
@@ -73,7 +73,7 @@
     <section id="dashboard">
         <div class="dashboard-content">
             <div class="card tip-container">
-                <h2>Welcome Smoldier</h2>
+                <h2>讀書計畫</h2>
                 <p>{{ today }}</p>
                 <div>
                     <p class="tip"><strong>Daily Tip</strong><br/>{{ todaysFact }}</p>
