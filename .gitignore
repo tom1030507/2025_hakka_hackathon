@@ -19,6 +19,16 @@ dist-ssr/
 .env
 *.env # Keep this for explicit .env files
 
+# Temporary audio files
+backend/temp_audio/
+backend/output/
+temp_audio/
+output/
+
+# Python cache
+backend/__pycache__/
+*.pyc
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json # Keep extensions.json if you want to share recommended extensions
