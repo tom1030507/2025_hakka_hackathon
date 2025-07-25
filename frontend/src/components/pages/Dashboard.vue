@@ -82,7 +82,7 @@
             <Grid v-bind="props"  />
         </div>
         <aside class="progress-container">
-            <h3>7天完成率</h3>
+            <!-- <h3>7天完成率</h3> -->
             <svg class="progress-ring" width="200" height="200">
                 <circle class="progress-ring__circle-bg" stroke="#eee" stroke-width="15" fill="transparent" r="90" cx="100" cy="100"/>
                 <circle class="progress-ring__circle" 
@@ -132,7 +132,8 @@
 
     .tip-container {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 2rem;
+        height: 240px; 
     }
 
     @media (min-width: 640px) {
