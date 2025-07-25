@@ -1,5 +1,5 @@
 <script setup>
-    import { ref, onMounted, onUnmounted, computed } from 'vue'
+    import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
     import Grid from '../Grid.vue'
 
     import { Facts } from '../../utils'
@@ -8,7 +8,8 @@
         handleSelectWorkout: Function,
         firstIncompleteWorkoutIndex: Number,
         handleResetPlan: Function,
-        sevenDayCompletionRate: Number
+        sevenDayCompletionRate: Number,
+        structuredDailyActivities: Object
     })
     
     // generate a random whole integer number between 0 and array length - 1
@@ -34,6 +35,15 @@
             timerId = setInterval(updateDate, 24 * 60 * 60 * 1000);
         }, msUntilMidnight);
     }
+
+    const incompleteAllActivities = computed(() => {
+        let all = [];
+        for (const dayIndex in props.structuredDailyActivities) {
+            const activities = props.structuredDailyActivities[dayIndex];
+            all = all.concat(activities.morning, activities.afternoon, activities.evening);
+        }
+        return all.filter(activity => !activity.completed);
+    });
 
     onMounted(() => {
         updateDate();
@@ -80,6 +90,17 @@
                         :stroke-dashoffset="strokeOffset" />
                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="progress-text">{{ props.sevenDayCompletionRate }}%</text>
             </svg>
+            <div class="todo-list-container card">
+                <h4>所有待辦 (未完成)</h4>
+                <ul v-if="incompleteAllActivities.length > 0">
+                    <li v-for="(activity, index) in incompleteAllActivities" :key="index">
+                        <span>{{ activity.text }}</span>
+                    </li>
+                </ul>
+                <p v-else>目前沒有未完成的待辦事項！</p>
+                
+                
+            </div>
         </aside>
     </section>
 </template>
@@ -136,5 +157,61 @@
         font-size: 2rem;
         font-weight: bold;
         fill: var(--color-text);
+    }
+
+    .todo-list-container {
+        width: 100%;
+        margin-top: 2rem;
+        padding: 1rem;
+    }
+
+    .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+    }
+
+    .add-task {
+    display: flex;
+    gap: 0.5rem;
+    }
+
+    .add-task-container {
+        margin-top: 0.5rem;
+    }
+
+    ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    }
+
+    li {
+    background-color: var(--background-muted);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    }
+
+    li.completed span {
+    text-decoration: line-through;
+    color: #888;
+    }
+
+    .complete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.2rem;
+    color: #888;
+    }
+
+    .complete-btn:hover {
+    color: var(--color-link);
     }
 </style>

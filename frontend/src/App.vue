@@ -8,19 +8,27 @@ const router = useRouter()
 
 const workouts = ref(workoutProgram)
 const selectedWorkout = ref(null)
-const allDailyActivities = ref([]);
+const structuredDailyActivities = ref({});
 
 const loadDailyActivities = () => {
-  let all = [];
   for (let i = 0; i < 7; i++) {
     const savedActivities = localStorage.getItem(`dailyActivities_${i}`);
     if (savedActivities) {
-      const dayActivities = JSON.parse(savedActivities);
-      all = all.concat(dayActivities.morning, dayActivities.afternoon, dayActivities.evening);
+      structuredDailyActivities.value[i] = JSON.parse(savedActivities);
+    } else {
+      structuredDailyActivities.value[i] = { morning: [], afternoon: [], evening: [] };
     }
   }
-  allDailyActivities.value = all;
 };
+
+const flatAllActivities = computed(() => {
+  let all = [];
+  for (const dayIndex in structuredDailyActivities.value) {
+    const activities = structuredDailyActivities.value[dayIndex];
+    all = all.concat(activities.morning, activities.afternoon, activities.evening);
+  }
+  return all;
+});
 
 onMounted(() => {
   loadDailyActivities();
@@ -66,9 +74,9 @@ const handleResetPlan = () => {
 };
 
 const sevenDayCompletionRate = computed(() => {
-  if (allDailyActivities.value.length === 0) return 0;
-  const completedCount = allDailyActivities.value.filter(a => a.completed).length;
-  return Math.round((completedCount / allDailyActivities.value.length) * 100);
+  if (flatAllActivities.value.length === 0) return 0;
+  const completedCount = flatAllActivities.value.filter(a => a.completed).length;
+  return Math.round((completedCount / flatAllActivities.value.length) * 100);
 });
 </script>
 
@@ -84,6 +92,7 @@ const sevenDayCompletionRate = computed(() => {
       :handleResetPlan="handleResetPlan"
       :sevenDayCompletionRate="sevenDayCompletionRate"
       :loadDailyActivities="loadDailyActivities"
+      :structuredDailyActivities="structuredDailyActivities"
     >
       <component :is="Component" />
     </router-view>
