@@ -1,61 +1,183 @@
-<script setup>
-    defineProps({
-        handleChangeDisplay: Function
-    })
-</script>
-
 <template>
-    <section id="welcome">
-        <div class="benefits">
-            <h2>Complete this program<br/>if you want...</h2>
-            <div>
-                <p>✅ Follow a simple program with proven results.</p>
-                <p>✅ Get fit, healthy, strong and absolutely shredded.</p>
-                <p>✅ Learn more about gym, training and technique</p>
-            </div>
-        </div>
-        <div>
-            <h3>The Training Plan</h3>
-            <p>This training plan follows a structure known as the <strong>Bro Split</strong>.</p>
-            <h5><i>Push &rarr; Pull &rarr; Legs &rarr; Repeat</i></h5>
-        </div>
-        <div class="card challenge">
-            <h3>🔥 Your Challenge</h3>
-            <p>Complete all the workouts and track your progress along the way!</p>
-            <p>Do you accept?</p>
-            <button @click="() => handleChangeDisplay(2)">Begin &rarr;</button>
-        </div>
-    </section>
+  <div class="cover-container">
+    <div class="content">
+      <h1 class="main-title">歡迎您的蒞臨</h1>
+      <p class="subtitle">探索為您量身打造的客語學習管道</p>
+
+      <div class="courses-grid">
+        <button 
+          v-for="feature in courses" 
+          :key="feature.id"
+          class="cta-button"
+          @click="goToFeature(feature)"
+        >
+          {{ feature.title }}
+          <span class="arrow">></span>
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+// --- 背景圖片設定 ---
+// 使用 public 資料夾中的圖片路徑
+const backgroundImage = '/images/Course1.jpg';
+
+const router = useRouter();
+
+// 特色功能資料 - 更新路由以匹配 Layout.vue 中的導航
+const courses = ref([
+  {
+    id: 1,
+    number: '01',
+    title: '學習',
+    description: '學習簡介',
+    route: '/blank1'  // 更新為匹配 Layout.vue 中的路由
+  },
+  {
+    id: 2,
+    number: '02', 
+    title: '學習計畫',
+    description: '學習計畫簡介',
+    route: '/dashboard'  // 更新為匹配 Layout.vue 中的路由
+  }
+]);
+
+// 直接導航到特定功能
+const goToFeature = (feature) => {
+  router.push(feature.route);
+};
+</script>
+
 <style scoped>
-    #welcome,
-    .challenge,
-    .benefits {
-        display: flex;
-        flex-direction: column;
-    }
+.cover-container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  /* 使用傳統傘背景圖片 */
+  background-image: url('/images/welcome_background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
-    #welcome {
-        gap: 1.5rem;
-    }
+.cover-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+  z-index: 1;
+}
 
-    .benefits {
-        gap: 0.5rem;
-    }
+.content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #2c3e50;
+  width: 100vw;
+  max-width: none;
+  padding: 40px 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-    .challenge {
-        gap: 0.25rem;
-    }
+.main-title {
+  font-size: 7rem;
+  font-weight: 900;
+  margin-bottom: 20px;
+  text-shadow: 
+    4px 4px 12px rgba(0, 0, 0, 0.6),
+    2px 2px 6px rgba(0, 0, 0, 0.4),
+    0px 0px 20px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 1s ease-out;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  letter-spacing: 2px;
+  line-height: 1.1;
+}
 
-    @media (min-width: 640px) {
-        #welcome {
-            gap: 2rem;
-            padding: 1rem 0;
-        }
+.subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+  opacity: 0.8;
+  text-shadow: 
+    2px 2px 8px rgba(0, 0, 0, 0.5),
+    1px 1px 4px rgba(0, 0, 0, 0.3),
+    0px 0px 12px rgba(0, 0, 0, 0.2);
+  animation: fadeInUp 1s ease-out 0.3s both;
+  color: rgba(255, 255, 255, 0.85);
+}
 
-        .benefits {
-            gap: 1rem;
-        }
-    }
+.courses-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 50px 0;
+  animation: fadeInUp 1s ease-out 0.6s both;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+}
+
+.cta-button {
+  background: linear-gradient(135deg, #42b983, #3a8a6e);
+  color: white;
+  padding: 25px 50px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(66, 185, 131, 0.3);
+  animation: fadeInUp 1s ease-out 0.9s both;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(66, 185, 131, 0.4);
+  background: linear-gradient(135deg, #3a8a6e, #2d6b56);
+}
+
+.arrow {
+  font-size: 1.6rem;
+  transition: transform 0.3s ease;
+  margin-left: 20px;
+}
+
+.cta-button:hover .arrow {
+  transform: translateX(5px);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>

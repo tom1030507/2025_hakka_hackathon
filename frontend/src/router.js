@@ -10,7 +10,6 @@ const routes = [
   { path: '/', component: Welcome },
   { path: '/dashboard', component: Dashboard },
   { path: '/blank1', component: Learning },
-  { path: '/blank2', component: Blank },
   { path: '/workout/:dayIndex', component: Workout, props: true },
   {
     path: '/course/1',

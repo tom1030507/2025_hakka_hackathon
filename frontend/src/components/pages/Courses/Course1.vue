@@ -1,102 +1,92 @@
-<!-- <template>
-  <div>
-    <h1>待....c1</h1>
-  </div>
-</template>
-
-<script setup>
-</script>
-
-<style scoped>
-</style> -->
-
-
 <template>
-  <div class="container">
-    <h1>使用單字卡學習後進行測驗!</h1>
-    <div class="tabs">
-      <button @click="showSection('flashcard')" :class="{ active: currentSection === 'flashcard' }">單字卡</button>
-      <button @click="showSection('quiz')" :class="{ active: currentSection === 'quiz' }">測驗</button>
-      <button @click="showSection('translate')" :class="{ active: currentSection === 'translate' }">翻譯</button>
-    </div>
-
-    <!-- Flashcard Section -->
-    <div v-if="currentSection === 'flashcard'" id="flashcard-section">
-      <div id="card">
-        <p id="chinese" class="big">{{ cards[currentCard].chinese }}</p>
-        <p id="hakka" class="roman">{{ cards[currentCard].hakka }}</p>
-        <button @click="playAudio(cards[currentCard].audio)" :disabled="!cards[currentCard].audio">🔊 播放客語</button>
+  <div class="page-wrapper">
+    <div class="background-overlay"></div>
+    <div class="container">
+      <h1>使用單字卡學習後進行測驗!</h1>
+      <div class="tabs">
+        <button @click="showSection('flashcard')" :class="{ active: currentSection === 'flashcard' }">單字卡</button>
+        <button @click="showSection('quiz')" :class="{ active: currentSection === 'quiz' }">測驗</button>
+        <button @click="showSection('translate')" :class="{ active: currentSection === 'translate' }">翻譯</button>
       </div>
-      <div class="nav">
-        <button @click="prevCard">上一張</button>
-        <button @click="nextCard">下一張</button>
-      </div>
-      <p id="progress">第 {{ currentCard + 1 }} / {{ cards.length }} 張</p>
-    </div>
 
-    <!-- Translate Section -->
-    <div v-if="currentSection === 'translate'" id="translate-section">
-      <div id="translate-container">
-        <div class="input-section">
-          <label for="chinese-input" class="input-label">請輸入中文：</label>
-          <textarea 
-            id="chinese-input" 
-            v-model="chineseInput" 
-            placeholder="請輸入要翻譯的中文..."
-            rows="3"
-            @input="onInputChange"
-          ></textarea>
+      <!-- Flashcard Section -->
+      <div v-if="currentSection === 'flashcard'" id="flashcard-section">
+        <div id="card">
+          <p id="chinese" class="big">{{ cards[currentCard].chinese }}</p>
+          <p id="hakka" class="roman">{{ cards[currentCard].hakka }}</p>
+          <button @click="playAudio(cards[currentCard].audio)" :disabled="!cards[currentCard].audio">🔊 播放客語</button>
         </div>
-        
-        <div class="translate-button-section">
-          <button @click="translateText" :disabled="!chineseInput.trim()" class="translate-btn">翻譯成客語</button>
+        <div class="nav">
+          <button @click="prevCard">上一張</button>
+          <button @click="nextCard">下一張</button>
         </div>
-        
-        <div class="result-section" v-if="translationResult.show">
-          <label class="result-label">客語翻譯：</label>
-          <div id="translation-result">
-            <p class="hakka-text">{{ translationResult.hakka }}</p>
-            <button 
-              @click="playTranslationAudio" 
-              :disabled="!translationResult.audio"
-              class="audio-btn"
-            >🔊 播放客語</button>
+        <p id="progress">第 {{ currentCard + 1 }} / {{ cards.length }} 張</p>
+      </div>
+
+      <!-- Translate Section -->
+      <div v-if="currentSection === 'translate'" id="translate-section">
+        <div id="translate-container">
+          <div class="input-section">
+            <label for="chinese-input" class="input-label">請輸入中文：</label>
+            <textarea 
+              id="chinese-input" 
+              v-model="chineseInput" 
+              placeholder="請輸入要翻譯的中文..."
+              rows="3"
+              @input="onInputChange"
+            ></textarea>
           </div>
-        </div>
-        
-        <div class="history-section" v-if="translationHistory.length > 0">
-          <h3>翻譯記錄</h3>
-          <div class="history-list">
-            <div 
-              v-for="(item, index) in translationHistory" 
-              :key="index" 
-              class="history-item"
-              @click="loadHistoryItem(item)"
-            >
-              <div class="history-chinese">{{ item.chinese }}</div>
-              <div class="history-hakka">{{ item.hakka }}</div>
+          
+          <div class="translate-button-section">
+            <button @click="translateText" :disabled="!chineseInput.trim()" class="translate-btn">翻譯成客語</button>
+          </div>
+          
+          <div class="result-section" v-if="translationResult.show">
+            <label class="result-label">客語翻譯：</label>
+            <div id="translation-result">
+              <p class="hakka-text">{{ translationResult.hakka }}</p>
+              <button 
+                @click="playTranslationAudio" 
+                :disabled="!translationResult.audio"
+                class="audio-btn"
+              >🔊 播放客語</button>
             </div>
           </div>
-          <button @click="clearHistory" class="clear-btn">清除記錄</button>
+          
+          <div class="history-section" v-if="translationHistory.length > 0">
+            <h3>翻譯記錄</h3>
+            <div class="history-list">
+              <div 
+                v-for="(item, index) in translationHistory" 
+                :key="index" 
+                class="history-item"
+                @click="loadHistoryItem(item)"
+              >
+                <div class="history-chinese">{{ item.chinese }}</div>
+                <div class="history-hakka">{{ item.hakka }}</div>
+              </div>
+            </div>
+            <button @click="clearHistory" class="clear-btn">清除記錄</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Quiz Section -->
-    <div v-if="currentSection === 'quiz'" id="quiz-section">
-      <template v-if="quizIndex < quizOrder.length">
-        <p id="quiz-question" class="big">「{{ cards[quizOrder[quizIndex]].chinese }}」的客語是？</p>
-        <button @click="playAudio(cards[quizOrder[quizIndex]].audio)" :disabled="!cards[quizOrder[quizIndex]].audio">🔊 播放客語</button>
-        <div id="quiz-options">
-          <button v-for="option in quizOptions" :key="option" @click="checkQuizAnswer(option, cards[quizOrder[quizIndex]].hakka)" :style="option.style">{{ option.text }}</button>
-        </div>
-        <button @click="nextQuizQuestion" :disabled="!quizAnswered">下一題</button>
-        <p id="quiz-score">目前得分：{{ quizScore }}</p>
-      </template>
-      <template v-else>
-        <p id="quiz-question" class="big">測驗完成！</p>
-        <p id="quiz-score">總得分：{{ quizScore }} / {{ cards.length }}</p>
-      </template>
+      <!-- Quiz Section -->
+      <div v-if="currentSection === 'quiz'" id="quiz-section">
+        <template v-if="quizIndex < quizOrder.length">
+          <p id="quiz-question" class="big">「{{ cards[quizOrder[quizIndex]].chinese }}」的客語是？</p>
+          <button @click="playAudio(cards[quizOrder[quizIndex]].audio)" :disabled="!cards[quizOrder[quizIndex]].audio">🔊 播放客語</button>
+          <div id="quiz-options">
+            <button v-for="option in quizOptions" :key="option" @click="checkQuizAnswer(option, cards[quizOrder[quizIndex]].hakka)" :style="option.style">{{ option.text }}</button>
+          </div>
+          <button @click="nextQuizQuestion" :disabled="!quizAnswered">下一題</button>
+          <p id="quiz-score">目前得分：{{ quizScore }}</p>
+        </template>
+        <template v-else>
+          <p id="quiz-question" class="big">測驗完成！</p>
+          <p id="quiz-score">總得分：{{ quizScore }} / {{ cards.length }}</p>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -319,18 +309,44 @@ function clearHistory() {
 onMounted(() => {
   loadCard();
 });
-
 </script>
 
 <style scoped>
-/* Using the same styles from the original CSS file */
+/* Background styles */
+.page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  background-image: url('./Course_background/Course1_page.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex; /* Use flexbox to center content */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+/* Background overlay */
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(3px);
+  z-index: -1;
+}
+
+/* Container styles with enhanced transparency */
 .container {
   max-width: 500px;
-  margin: 2em auto;
   padding: 2em;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.92);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: -10vh; /* Increased from -5vh to move content further upward */
 }
 
 h1 {
@@ -342,22 +358,33 @@ h1 {
   padding: 0.5em 1.2em;
   border: none;
   border-radius: 6px;
-  background-color: #e0e0e0;
+  background-color: rgba(224, 224, 224, 0.9);
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: 1rem;
 }
 
 .tabs button.active {
-  background-color: #d0d0ff;
+  background-color: rgba(208, 208, 255, 0.9);
   font-weight: bold;
 }
 
-#card, #quiz-section, #translate-section {
-  border: 2px solid #e0e0e0;
+#flashcard-section {
+  border: 2px solid rgba(224, 224, 224, 0.8);
   border-radius: 10px;
   padding: 1.5em 1em;
   margin-bottom: 1.5em;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+}
+
+#quiz-section, #translate-section {
+  border: 2px solid rgba(224, 224, 224, 0.8);
+  border-radius: 10px;
+  padding: 1.5em 1em;
+  margin-bottom: 1.5em;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
 }
 
 .big {
@@ -376,18 +403,18 @@ button {
   padding: 0.6em 1.2em;
   border: none;
   border-radius: 6px;
-  background-color: #e0e0e0;
+  background-color: rgba(224, 224, 224, 0.9);
   cursor: pointer;
   transition: background-color 0.2s;
   font-size: 1rem;
 }
 
 button:hover:not(:disabled) {
-  background-color: #d0d0ff;
+  background-color: rgba(208, 208, 255, 0.9);
 }
 
 button:disabled {
-  background-color: #cccccc;
+  background-color: rgba(204, 204, 204, 0.7);
   cursor: not-allowed;
 }
 
@@ -422,13 +449,14 @@ button:disabled {
 #chinese-input {
   width: 100%;
   padding: 0.8em;
-  border: 2px solid #e0e0e0;
+  border: 2px solid rgba(224, 224, 224, 0.8);
   border-radius: 6px;
   font-size: 1rem;
   resize: vertical;
   min-height: 80px;
   box-sizing: border-box;
   font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 #chinese-input:focus {
@@ -454,7 +482,7 @@ button:disabled {
 }
 
 .translate-btn:disabled {
-  background-color: #cccccc;
+  background-color: rgba(204, 204, 204, 0.7);
   color: #888;
 }
 
@@ -463,8 +491,8 @@ button:disabled {
 }
 
 #translation-result {
-  background-color: #f8f9fa;
-  border: 2px solid #e0e0e0;
+  background-color: rgba(248, 249, 250, 0.9);
+  border: 2px solid rgba(224, 224, 224, 0.8);
   border-radius: 8px;
   padding: 1.2em;
   text-align: center;
@@ -496,7 +524,7 @@ button:disabled {
   color: #555;
   font-size: 1.2rem;
   margin-bottom: 1em;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(224, 224, 224, 0.8);
   padding-bottom: 0.5em;
 }
 
@@ -507,8 +535,8 @@ button:disabled {
 }
 
 .history-item {
-  background-color: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background-color: rgba(248, 249, 250, 0.9);
+  border: 1px solid rgba(224, 224, 224, 0.8);
   border-radius: 6px;
   padding: 0.8em;
   margin-bottom: 0.5em;
@@ -517,7 +545,7 @@ button:disabled {
 }
 
 .history-item:hover {
-  background-color: #e9ecef;
+  background-color: rgba(233, 236, 239, 0.9);
 }
 
 .history-chinese {

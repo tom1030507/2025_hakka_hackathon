@@ -1,5 +1,10 @@
 <template>
   <div class="learning-container" :style="containerStyle">
+    <!-- 右上角標題 -->
+    <div class="page-title">
+      {{ blocks[activeIndex].text }}
+    </div>
+
     <div class="blocks-wrapper" :style="wrapperStyle">
       <div
         v-for="(block, index) in blocks"
@@ -22,17 +27,15 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 // --- 圖片路徑設定 ---
-import image1 from '../../Photos/course1cover.png';
-import image2 from '../../Photos/course2cover.png';
-import image3 from '../../Photos/course3cover.png';
-import image4 from '../../Photos/course4cover.png';
+import image1 from '../../Photos/Course1.jpg';
+import image2 from '../../Photos/Course2.jpg';
+import image3 from '../../Photos/Course3.jpg';
 
 // 方塊資料，現在包含圖片和路由路徑
 const blocks = ref([
-  { id: 1, text: '課程一', image: image1, route: '/Course/1' },
-  { id: 2, text: '課程二', image: image2, route: '/course/2' },
-  { id: 3, text: '課程三', image: image3, route: '/course/3' },
-  { id: 4, text: '課程四', image: image4, route: '/course/4' },
+  { id: 1, text: '基礎客語學習與翻譯', image: image1, route: '/Course/1' },
+  { id: 2, text: '每日精選新聞', image: image2, route: '/course/2' },
+  { id: 3, text: '自由訂定學習內容', image: image3, route: '/course/3' },
 ]);
 
 // 目前顯示在第一格的方塊索引
@@ -119,6 +122,18 @@ onUnmounted(() => {
   z-index: 1;
 }
 
+/* 右上角標題樣式 */
+.page-title {
+  position: absolute;
+  top: 80px;
+  right: 40px;
+  z-index: 10;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 80px;
+  font-weight: bold;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+}
+
 .blocks-wrapper {
   position: relative;
   z-index: 2;
@@ -129,23 +144,23 @@ onUnmounted(() => {
   width: 200px;
   height: 100px;
   margin-bottom: 20px;
-  background-color: rgba(66, 185, 131, 0.8);
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 24px;
+  font-size: 18px;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   transition: transform 0.5s ease-in-out, background-color 0.5s, border-color 0.5s;
   transform-origin: left center;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(10px);
 }
 
 .block.active {
   transform: scale(1.2);
-  background-color: rgba(58, 138, 110, 0.9);
-  border-color: white;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 /* 課程按鈕樣式 */
