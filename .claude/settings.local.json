@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose stop n8n-init)",
+      "Bash(docker-compose rm -f n8n-init)",
+      "Bash(docker-compose up n8n-init -d)",
+      "Bash(docker-compose logs n8n-init -f)",
+      "Bash(docker-compose restart n8n)",
+      "Bash(rm -rf n8n-init)",
+      "WebFetch(domain:docs.n8n.io)",
+      "Bash(mkdir -p custom-n8n)",
+      "Bash(docker-compose down)",
+      "Bash(docker-compose down --remove-orphans)",
+      "Bash(docker system prune -f)",
+      "Bash(docker network prune -f)",
+      "Bash(docker volume ls)",
+      "Bash(docker volume rm 2025_hakka_hackathon_n8n_data 2025_hakka_hackathon_postgres_data)",
+      "Bash(docker volume rm n8n_n8n_storage)",
+      "Bash(docker-compose up --build -d)",
+      "Bash(docker-compose logs n8n -f)",
+      "Bash(docker-compose build n8n)",
+      "Bash(docker-compose up n8n -d)",
+      "Bash(docker run --rm 2025_hakka_hackathon-n8n ls -la /scripts/)",
+      "Bash(docker-compose stop n8n)",
+      "Bash(docker-compose rm -f n8n)",
+      "Bash(docker-compose logs n8n --tail=10)",
+      "Bash(rm -rf custom-n8n)"
+    ],
+    "deny": []
+  }
+}

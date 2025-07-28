@@ -1,0 +1,484 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ce299175-4f93-451a-8da8-31f5753eb564",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        176
+      ],
+      "id": "3618db2d-e247-42e5-9f28-1c073b9062ff",
+      "name": "課程生成請求 (Webhook)",
+      "webhookId": "ce299175-4f93-451a-8da8-31f5753eb564"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位經驗豐富的資深課程設計專家與教學架構師。你的任務是根據下方提供的課程主題，設計一份結構完整、邏輯清晰的課程大綱。\n\n# 核心要求：\n\n彈性章節結構與教學邏輯：\n\n請根據主題的範疇與深度，專業地判斷並設計出最適切的章節數量，不限於固定章節數。\n\n大綱的整體結構應遵循一個清晰的學習路徑：從基礎概念與背景出發，深入到核心理論與原理，接著轉向實務應用與案例分析，最後以總結與未來展望作結。\n\n請將上述這些教學階段，靈活地組織到你認為最合適的章節數量中。例如，一個複雜的主題可能需要多個章節來闡述其核心理論或實務應用。\n\n小節規劃：在每個主要章節下，請規劃 3 到 5 個具體的「重點小節」，作為該章節的學習內容，確保內容的連貫性與深度。\n\nJSON 格式輸出：\n\n請務必以【嚴格的 JSON 格式】輸出你的設計。\n\nJSON 的根物件應為一個名為 \"course_outline\" 的陣列 (Array)。\n\n陣列中的每個物件代表一個章節，其物件數量（即總章節數）應由你的專業判斷決定。\n\n# JSON 輸出格式範例：\n（注意：以下範例僅為格式示意，你的設計可以包含任意數量的章節物件）\n\nGenerated json\n{\n  \"course_outline\": [\n    {\n      \"chapter_number\": 1,\n      \"chapter_title\": \"第一章的標題 (例如：基礎入門)\",\n      \"subsections\": [\n        \"1.1 第一個小節標題\",\n        \"1.2 第二個小節標題\",\n        \"1.3 第三個小節標題\"\n      ]\n    },\n    {\n      \"chapter_number\": 2,\n      \"chapter_title\": \"第二章的標題 (例如：核心原理)\",\n      \"subsections\": [\n        \"2.1 第一個小節標題\",\n        \"2.2 第二個小節標題\",\n        \"2.3 第三個小節標題\",\n        \"2.4 第四個小節標題\"\n      ]\n    },\n    {\n      \"chapter_number\": 3,\n      \"chapter_title\": \"第三章的標題 (例如：實務應用)\",\n      \"subsections\": [\n        \"3.1 第一個小節標題\",\n        \"3.2 第二個小節標題\",\n        \"3.3 第三個小節標題\"\n      ]\n    }\n  ]\n}```\n\n**# 請根據以下資訊開始設計：**\n\n*   **課程主題**：`{{ $json.body.topic }}`\n*   **課程難度**：`{{ $json.body.difficulty }}`",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -496,
+        176
+      ],
+      "id": "6ea43708-22d6-42a2-a5c7-380b61492cd1",
+      "name": "第一步：生成課程大綱",
+      "retryOnFail": true,
+      "notesInFlow": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"course_outline\": [\n    {\n      \"chapter_number\": 1,\n      \"chapter_title\": \"第一章：數與數感深化 (回顧與基礎拓展)\",\n      \"subsections\": [\n        \"1.1 大數的讀寫、位值與概數概念\",\n        \"1.2 分數的意義、擴分、約分與通分\",\n        \"1.3 分數與小數的運算 (加減乘除) 與混合計算\",\n        \"1.4 分數、小數與整數的相互轉換與大小比較\"\n      ]\n    },\n    {\n      \"chapter_number\": 2,\n      \"chapter_title\": \"第二章：比率與百分率的應用 (關係量化與實務計算)\",\n      \"subsections\": [\n        \"2.1 比、比值與正、反比關係的認識\",\n        \"2.2 百分率的意義與生活中常見的百分率表示\",\n        \"2.3 濃度、折扣、漲跌價等百分率應用問題\",\n        \"2.4 比與百分率的綜合應用與解題策略\"\n      ]\n    },\n    {\n      \"chapter_number\": 3,\n      \"chapter_title\": \"第三章：代數初步與方程式 (從算術到符號思維)\",\n      \"subsections\": [\n        \"3.1 符號與未知數的表示及簡單代數式\",\n        \"3.2 等量公理與等量關係的建立\",\n        \"3.3 一元一次方程式的列式與解法\",\n        \"3.4 應用問題的方程式解題與驗算\"\n      ]\n    },\n    {\n      \"chapter_number\": 4,\n      \"chapter_title\": \"第四章：基礎幾何與立體圖形 (空間概念與測量)\",\n      \"subsections\": [\n        \"4.1 平面圖形的面積計算 (圓、扇形、梯形等)\",\n        \"4.2 圓周長與圓面積的計算與應用\",\n        \"4.3 柱體與錐體的體積計算與容積概念\",\n        \"4.4 立體圖形的展開圖與表面積計算\"\n      ]\n    },\n    {\n      \"chapter_number\": 5,\n      \"chapter_title\": \"第五章：統計圖表與機率 (數據分析與隨機現象)\",\n      \"subsections\": [\n        \"5.1 各種統計圖表 (長條圖、圓形圖、折線圖) 的閱讀與繪製\",\n        \"5.2 平均數、中位數、眾數的計算與意義\",\n        \"5.3 機率的初步概念與事件發生的可能性\",\n        \"5.4 生活中的統計應用與機率判斷\"\n      ]\n    },\n    {\n      \"chapter_number\": 6,\n      \"chapter_title\": \"第六章：綜合應用與未來展望 (挑戰與銜接)\",\n      \"subsections\": [\n        \"6.1 跨單元綜合應用題的分析與解題策略\",\n        \"6.2 邏輯推理與問題解決能力的培養\",\n        \"6.3 升國中數學預備與銜接概念\",\n        \"6.4 數學在生活中的應用與重要性總結\"\n      ]\n    }\n  ]\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -384,
+        336
+      ],
+      "id": "7e9ddf19-70a0-4666-b778-aad16a797ff9",
+      "name": "解析課程大綱 (JSON)"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"message\": \"error\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        256
+      ],
+      "id": "e81defc5-1d20-49ea-b635-9d7ca9ec3062",
+      "name": "錯誤處理：回傳錯誤訊息",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.course_outline",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        96
+      ],
+      "id": "11bff9da-c798-4551-945c-6789ac3046e1",
+      "name": "拆分章節以便個別處理"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位結合了深厚學術知識與專業網頁內容寫作技巧的專家。你的任務是為特定的課程章節撰寫一份內容豐富、深入淺出且極具深度的專業教材。\n\n# 主要目標：\n根據提供的章節標題和重點小節，撰寫一份不僅清晰，而且內容詳實、案例充足、具備實用價值的完整章節內容。\n\n# 核心要求一：格式化輸出\n請【務必】使用 Markdown 格式 進行撰寫。你的撰寫必須遵循以下的結構與格式化指南：\n\n章節主標題 (H1)：使用一個 #。\n\n開場引言：在主標題下方，撰寫一段約 50-80 字的開場引言，概述本章的學習重點與價值，吸引讀者興趣。\n\n小節標題 (H2)：對於「本章重點」中的每一個項目，都使用兩個 ## 將其作為小節標題。\n\n強調與範例格式：\n\n對重要的「專有名詞」或「關鍵概念」，使用 **粗體** 強調。\n\n舉例或引用時，使用引言區塊 (>)。\n\n若涉及程式碼，使用 ``` 區塊。\n\n# 核心要求二：內容深度與豐富度指引\n為了確保內容的深度與實用性，請在每個小節的撰寫中遵循以下標準：\n\n深入闡述：在每個小節標題 (H2) 下，至少撰寫 3-5 個段落來進行全面說明。不僅要解釋「是什麼」，更要深入探討「為什麼」和「如何做」。\n\n清晰定義開頭：在闡述的開始，先為該小節的核心概念提供一個清晰、明確的定義。\n\n【強制】舉一反三：每一個核心概念或理論，都【必須】提供至少一個具體的、真實世界的案例或情境化範例。範例要能夠幫助讀者將抽象知識與實際應用連結起來。\n\n善用比喻與類比：對於較為複雜或抽象的觀點，鼓勵使用通俗易懂的比喻或類比來輔助說明，降低理解門檻。\n\n延伸探討：在解釋完核心內容後，可以適度加入相關的「常見誤區」、「最佳實踐」或「進階應用技巧」，以增加內容的附加價值。\n\n結構化總結：在章節的最後，撰寫一段結構完整的章節總結。總結中需要：\n\n回顧本章 2-3 個最關鍵的知識點。\n\n清晰地預告下一章節的學習內容，建立學習的連貫性。\n\n# 輸出指令：\n【極度重要】 你的回應 必須直接以 Markdown 的 H1 標題 (#) 開始。禁止 在內容前加入任何形式的開場白、問候語或解釋，例如「好的，這是我為您撰寫的內容...」或「當然，請看...」之類的文字。直接輸出純粹的教材內容。\n\n# 請根據以下資訊開始撰寫：\n\n課程總主題：{{ $('課程生成請求 (Webhook)').item.json.body.topic }}\n\n課程難度：{{ $('課程生成請求 (Webhook)').item.json.body.difficulty }}\n\n目前章節標題：{{ $json.chapter_title }}\n\n本章重點 (將作為 H2 小節標題)：\n{{ $json.subsections }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        144,
+        96
+      ],
+      "id": "ddf3e1e2-a982-4a31-a963-cff6af9b8e4a",
+      "name": "第二步：撰寫章節詳細內容",
+      "retryOnFail": true,
+      "notesInFlow": true,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        144,
+        256
+      ],
+      "id": "71d4c5b9-aee6-4b13-ad3b-833d227bccde",
+      "name": "內容撰寫模型 (Gemini Pro)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Z7ucFmgXO79CLjHp",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        336
+      ],
+      "id": "d8f4a7a9-f26f-4e79-afb9-d1b658140e23",
+      "name": "大綱生成模型 (Gemini Flash)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Hxl9NWPINn72yL8D",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "16c53f58-043e-46db-be60-bd9cdc71a006",
+              "leftValue": "={{ $('課程生成請求 (Webhook)').item.json.body.includeQuiz }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        208
+      ],
+      "id": "537d5ad7-c7b4-4d4e-a98b-4438b292079f",
+      "name": "條件判斷：是否需要測驗？"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位專業的教學評量設計師與測驗出題專家。你的任務是根據下方提供的【章節教材內容】，設計一份高品質的選擇題測驗，用以檢驗學習者的核心概念理解程度。\n\n**# 核心要求：**\n1.  **題目數量**：這份測驗【必須】剛好包含 **4** 道題目。\n2.  **題目類型**：每一題都必須是單選題，且有 **A, B, C, D** 四個選項。\n3.  **品質要求**：\n    *   題目的設計必須與提供的教材內容高度相關。\n    *   除了正確答案外，其他三個干擾選項 (distractors) 必須具有一定的迷惑性，能夠辨別出學習者是否真正理解了概念，而非僅僅是猜測。\n4.  **JSON 格式輸出**：請務必以【嚴格的 JSON 格式】輸出你的設計。JSON 的根物件應為一個名為 `quiz_questions` 的陣列 (Array)，其中包含 4 個物件，每個物件代表一題。\n\n**# JSON 輸出格式範例（請嚴格遵守此結構）：**\n{\n  \"quiz_questions\": [\n    {\n      \"question_number\": 1,\n      \"question_text\": \"這是第一題的題目內文，用來測試一個具體的知識點。\",\n      \"options\": {\n        \"A\": \"這是選項A的文字，可能是一個常見的錯誤觀念。\",\n        \"B\": \"這是選項B的文字，內容看似正確但與題目無關。\",\n        \"C\": \"這是選項C的文字，也就是本題的正確答案。\",\n        \"D\": \"這是選項D的文字，是另一個干擾選項。\"\n      },\n      \"correct_answer\": \"C\",\n      \"explanation\": \"這裡是關於為什麼C是正確答案的簡短說明，可以幫助學習者鞏固知識。\"\n    },\n    {\n      \"question_number\": 2,\n      \"question_text\": \"這是第二題的題目內文...\",\n      \"options\": {\n        \"A\": \"選項A\",\n        \"B\": \"選項B\",\n        \"C\": \"選項C\",\n        \"D\": \"選項D\"\n      },\n      \"correct_answer\": \"A\",\n      \"explanation\": \"對第二題正確答案的解釋。\"\n    },\n    {\n      \"question_number\": 3,\n      \"question_text\": \"這是第三題的題目內文...\",\n      \"options\": {\n        \"A\": \"選項A\",\n        \"B\": \"選項B\",\n        \"C\": \"選項C\",\n        \"D\": \"選項D\"\n      },\n      \"correct_answer\": \"D\",\n      \"explanation\": \"對第三題正確答案的解釋。\"\n    },\n    {\n      \"question_number\": 4,\n      \"question_text\": \"這是第四題的題目內文...\",\n      \"options\": {\n        \"A\": \"選項A\",\n        \"B\": \"選項B\",\n        \"C\": \"選項C\",\n        \"D\": \"選項D\"\n      },\n      \"correct_answer\": \"B\",\n      \"explanation\": \"對第四題正確答案的解釋。\"\n    }\n  ]\n}\n\n**# 請根據以下資訊開始設計：**\n\n*   **章節教材內容**：`{{ $json.text }}`",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        704,
+        272
+      ],
+      "id": "8784905c-55a6-43d3-9699-698efcca524b",
+      "name": "第三步 (可選)：生成隨堂測驗",
+      "retryOnFail": true,
+      "notesInFlow": false,
+      "executeOnce": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        704,
+        432
+      ],
+      "id": "e5c30620-df14-4a08-83a2-67670bb8cfda",
+      "name": "測驗生成模型 (Gemini Pro)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZUMqgDdhutNZ8quP",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"quiz_questions\": [\n    {\n      \"question_number\": 1,\n      \"question_text\": \"這是第一題的題目內文，用來測試一個具體的知識點。\",\n      \"options\": {\n        \"A\": \"這是選項A的文字，可能是一個常見的錯誤觀念。\",\n        \"B\": \"這是選項B的文字，內容看似正確但與題目無關。\",\n        \"C\": \"這是選項C的文字，也就是本題的正確答案。\",\n        \"D\": \"這是選項D的文字，是另一個干擾選項。\"\n      },\n      \"correct_answer\": \"C\",\n      \"explanation\": \"這裡是關於為什麼C是正確答案的簡短說明，可以幫助學習者鞏固知識。\"\n    },\n    {\n      \"question_number\": 2,\n      \"question_text\": \"這是第二題的題目內文...\",\n      \"options\": {\n        \"A\": \"選項A\",\n        \"B\": \"選項B\",\n        \"C\": \"選項C\",\n        \"D\": \"選項D\"\n      },\n      \"correct_answer\": \"A\",\n      \"explanation\": \"對第二題正確答案的解釋。\"\n    },\n    {\n      \"question_number\": 3,\n      \"question_text\": \"這是第三題的題目內文...\",\n      \"options\": {\n        \"A\": \"選項A\",\n        \"B\": \"選項B\",\n        \"C\": \"選項C\",\n        \"D\": \"選項D\"\n      },\n      \"correct_answer\": \"D\",\n      \"explanation\": \"對第三題正確答案的解釋。\"\n    },\n    {\n      \"question_number\": 4,\n      \"question_text\": \"這是第四題的題目內文...\",\n      \"options\": {\n        \"A\": \"選項A\",\n        \"B\": \"選項B\",\n        \"C\": \"選項C\",\n        \"D\": \"選項D\"\n      },\n      \"correct_answer\": \"B\",\n      \"explanation\": \"對第四題正確答案的解釋。\"\n    }\n  ]\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        432
+      ],
+      "id": "71cc6b9a-4fa2-4691-8852-78edc6e68f8d",
+      "name": "解析測驗題目 (JSON)"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1232,
+        112
+      ],
+      "id": "a5b002d5-30ec-4759-a612-8774c4653a88",
+      "name": "最終步驟：回傳完整課程資料",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1072,
+        112
+      ],
+      "id": "1c996267-32b4-47c6-b743-0c0aedd9bd9a",
+      "name": "整合資料：合併文章與測驗"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        816,
+        576
+      ],
+      "id": "41b1bc2e-218b-40e2-821e-91c31349e7b2",
+      "name": "測驗 JSON 修復模型 (Gemini Flash)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zomD93gYsF7hnOjU",
+          "name": "Google Gemini(PaLM) Api account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        480
+      ],
+      "id": "7e6194cd-32e7-48c0-a4fa-ace8c502688c",
+      "name": "大綱 JSON 修復模型 (Gemini Flash)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zomD93gYsF7hnOjU",
+          "name": "Google Gemini(PaLM) Api account 4"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "課程生成請求 (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "第一步：生成課程大綱",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "第一步：生成課程大綱": {
+      "main": [
+        [
+          {
+            "node": "拆分章節以便個別處理",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "錯誤處理：回傳錯誤訊息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析課程大綱 (JSON)": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "第一步：生成課程大綱",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "拆分章節以便個別處理": {
+      "main": [
+        [
+          {
+            "node": "第二步：撰寫章節詳細內容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "第二步：撰寫章節詳細內容": {
+      "main": [
+        [
+          {
+            "node": "整合資料：合併文章與測驗",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "條件判斷：是否需要測驗？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "內容撰寫模型 (Gemini Pro)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "第二步：撰寫章節詳細內容",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "大綱生成模型 (Gemini Flash)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "第一步：生成課程大綱",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "條件判斷：是否需要測驗？": {
+      "main": [
+        [
+          {
+            "node": "整合資料：合併文章與測驗",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "第三步 (可選)：生成隨堂測驗",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "第三步 (可選)：生成隨堂測驗": {
+      "main": [
+        [
+          {
+            "node": "整合資料：合併文章與測驗",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        []
+      ]
+    },
+    "測驗生成模型 (Gemini Pro)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "第三步 (可選)：生成隨堂測驗",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析測驗題目 (JSON)": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "第三步 (可選)：生成隨堂測驗",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "整合資料：合併文章與測驗": {
+      "main": [
+        [
+          {
+            "node": "最終步驟：回傳完整課程資料",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "測驗 JSON 修復模型 (Gemini Flash)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "解析測驗題目 (JSON)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "大綱 JSON 修復模型 (Gemini Flash)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "解析課程大綱 (JSON)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a73bb6bb869bccf8478af93edfdc0f777090296147faad803d4743f20b051920"
+  }
+}
