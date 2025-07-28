@@ -19,6 +19,46 @@
             @keydown.enter.prevent="submitInput"
           ></textarea>
         </div>
+        
+        <!-- 課程難易度選擇 -->
+        <div class="difficulty-section">
+          <label class="section-label">課程難易度：</label>
+          <div class="difficulty-options">
+            <label class="difficulty-option" :class="{ active: selectedDifficulty === 'beginner' }">
+              <input type="radio" v-model="selectedDifficulty" value="beginner" />
+              <span class="difficulty-content">
+                <span class="difficulty-title">初級</span>
+              </span>
+            </label>
+            <label class="difficulty-option" :class="{ active: selectedDifficulty === 'intermediate' }">
+              <input type="radio" v-model="selectedDifficulty" value="intermediate" />
+              <span class="difficulty-content">
+                <span class="difficulty-title">中級</span>
+              </span>
+            </label>
+            <label class="difficulty-option" :class="{ active: selectedDifficulty === 'advanced' }">
+              <input type="radio" v-model="selectedDifficulty" value="advanced" />
+              <span class="difficulty-content">
+                <span class="difficulty-title">高級</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- 練習題選項 -->
+        <div class="quiz-option-section">
+          <label class="section-label">學習選項：</label>
+          <div class="quiz-checkbox-container">
+            <label class="quiz-checkbox" :class="{ checked: includeQuiz }">
+              <input type="checkbox" v-model="includeQuiz" />
+              <span class="checkmark"></span>
+              <span class="checkbox-content">
+                <span class="checkbox-title">包含練習題</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        
         <div class="button-section">
           <button @click="submitInput" :disabled="!inputValue.trim()" class="submit-button">
             開始學習
@@ -153,6 +193,8 @@ const submitted = ref(false);
 const showContent = ref(false); // New ref to control content visibility
 const inputValue = ref(''); // New ref for input field
 const generatingCourse = ref(false); // Loading state for course generation
+const selectedDifficulty = ref('intermediate'); // Default to intermediate
+const includeQuiz = ref(true); // Default to include quiz
 
 onMounted(async () => {
   try {
@@ -235,8 +277,12 @@ const submitInput = async () => {
   showContent.value = true;
   generatingCourse.value = false;
   
-  // You can also do something with inputValue here, e.g., send it to a backend
-  console.log('Input submitted:', inputValue.value);
+  // Log user selections for potential backend integration
+  console.log('Course settings:', {
+    topic: inputValue.value,
+    difficulty: selectedDifficulty.value,
+    includeQuiz: includeQuiz.value
+  });
 };
 
 const resetCourse = () => {
@@ -245,6 +291,8 @@ const resetCourse = () => {
   currentPage.value = 0;
   courses.value = [];
   generatingCourse.value = false;
+  selectedDifficulty.value = 'intermediate';
+  includeQuiz.value = true;
   resetQuizState();
 };
 </script>
@@ -437,11 +485,193 @@ const resetCourse = () => {
 }
 
 .submit-button:disabled {
-  background: linear-gradient(135deg, #adb5bd 0%, #868e96 100%);
+  background: linear-gradient(135deg, #c1c9d0 0%, #9ca3af 100%);
   cursor: not-allowed;
   transform: none;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  opacity: 0.7;
+  opacity: 0.6;
+  color: #6b7280;
+}
+
+/* New styles for difficulty selection and quiz options */
+.difficulty-section, .quiz-option-section {
+  margin-bottom: 1.8rem;
+}
+
+.section-label {
+  display: block;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  letter-spacing: -0.2px;
+}
+
+/* Difficulty Options Styles */
+.difficulty-options {
+  display: flex;
+  flex-direction: row;
+  gap: 0.8rem;
+}
+
+.difficulty-option {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #fafbfc;
+  flex: 1;
+  justify-content: center;
+  text-align: center;
+}
+
+.difficulty-option:hover {
+  border-color: #667eea;
+  background-color: #f8f9ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.difficulty-option.active {
+  border-color: #667eea;
+  background-color: #f0f4ff;
+  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
+}
+
+.difficulty-option input[type="radio"] {
+  display: none;
+}
+
+.difficulty-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.difficulty-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.3rem;
+}
+
+.difficulty-desc {
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.difficulty-option.active .difficulty-title {
+  color: #667eea;
+}
+
+.difficulty-option.active .difficulty-desc {
+  color: #5a67d8;
+}
+
+/* Quiz Checkbox Styles */
+.quiz-checkbox-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.quiz-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #fafbfc;
+  position: relative;
+}
+
+.quiz-checkbox:hover {
+  border-color: #28a745;
+  background-color: #f8fff9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
+}
+
+.quiz-checkbox.checked {
+  border-color: #28a745;
+  background-color: #f0fff4;
+  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.2);
+}
+
+.quiz-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 2px solid #e9ecef;
+  border-radius: 4px;
+  margin-right: 1rem;
+  position: relative;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.quiz-checkbox:hover .checkmark {
+  border-color: #28a745;
+}
+
+.quiz-checkbox.checked .checkmark {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.quiz-checkbox.checked .checkmark:after {
+  display: block;
+}
+
+.checkbox-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.checkbox-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.3rem;
+}
+
+.checkbox-desc {
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+.quiz-checkbox.checked .checkbox-title {
+  color: #28a745;
+}
+
+.quiz-checkbox.checked .checkbox-desc {
+  color: #218838;
 }
 
 /* Course Layout Styles */
@@ -904,6 +1134,22 @@ const resetCourse = () => {
     padding: 1rem 2rem;
     min-width: 160px;
     font-size: 1rem;
+  }
+  
+  .difficulty-options {
+    gap: 0.5rem;
+  }
+  
+  .difficulty-option {
+    padding: 0.7rem 0.5rem;
+  }
+  
+  .difficulty-title {
+    font-size: 1rem;
+  }
+  
+  .difficulty-desc {
+    font-size: 0.8rem;
   }
 }
 
