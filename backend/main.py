@@ -8,7 +8,8 @@ import os
 from gtts import gTTS
 from pydub import AudioSegment
 import urllib.parse
-from dotenv import load_dotenv # <-- 新增這一行
+from dotenv import load_dotenv # <- 新增這一行
+from course_generator import CourseRequest, course_generator
 
 
 # 在應用程式啟動時載入環境變數
@@ -201,6 +202,39 @@ def get_news_and_audio():
         # Log the full error for debugging
         print(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+
+
+@app.post("/api/generate_course")
+async def generate_course(request: CourseRequest):
+    """
+    生成課程內容的 API 端點
+    
+    Args:
+        request: 包含 topic (主題), difficulty (難度), includeQuiz (是否包含測驗) 的請求
+        
+    Returns:
+        課程數據列表
+    """
+    try:
+        print(f"收到課程生成請求: topic={request.topic}, difficulty={request.difficulty}, includeQuiz={request.includeQuiz}")
+        
+        # 調用課程生成模組
+        course_data = await course_generator.generate_course(request)
+        
+        print(f"課程生成完成，包含 {len(course_data)} 個章節")
+        
+        return {
+            "success": True,
+            "message": "課程生成成功",
+            "data": course_data
+        }
+        
+    except Exception as e:
+        print(f"課程生成失敗: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"課程生成失敗: {str(e)}"
+        )
 
 
 @app.get("/")

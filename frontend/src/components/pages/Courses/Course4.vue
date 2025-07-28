@@ -275,18 +275,58 @@ const submitInput = async () => {
   
   generatingCourse.value = true;
   
-  // Simulate course generation delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  showContent.value = true;
-  generatingCourse.value = false;
-  
-  // Log user selections for potential backend integration
-  console.log('Course settings:', {
-    topic: inputValue.value,
-    difficulty: selectedDifficulty.value,
-    includeQuiz: includeQuiz.value
-  });
+  try {
+    // 調用後端課程生成 API
+    const response = await fetch('http://localhost:8000/api/generate_course', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        topic: inputValue.value,
+        difficulty: selectedDifficulty.value,
+        includeQuiz: includeQuiz.value
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.success && result.data) {
+      // 使用 API 返回的課程數據
+      courses.value = result.data;
+      resetQuizState();
+      showContent.value = true;
+      console.log('課程生成成功，包含', courses.value.length, '個章節');
+    } else {
+      throw new Error(result.message || '課程生成失敗');
+    }
+    
+  } catch (error) {
+    console.error('課程生成失敗:', error);
+    
+    // 如果 API 調用失敗，使用靜態數據作為後備
+    try {
+      const response = await fetch('/data/response.json');
+      if (response.ok) {
+        const data = await response.json();
+        courses.value = data;
+        resetQuizState();
+        showContent.value = true;
+        console.log('使用靜態課程數據作為後備');
+      } else {
+        throw new Error('無法加載靜態課程數據');
+      }
+    } catch (fallbackError) {
+      console.error('後備數據載入也失敗:', fallbackError);
+      alert('課程生成失敗，請稍後再試');
+    }
+  } finally {
+    generatingCourse.value = false;
+  }
 };
 
 const resetCourse = () => {
