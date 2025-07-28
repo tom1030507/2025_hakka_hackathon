@@ -22,40 +22,44 @@
         
         <!-- 課程難易度選擇 -->
         <div class="difficulty-section">
-          <label class="section-label">課程難易度：</label>
-          <div class="difficulty-options">
-            <label class="difficulty-option" :class="{ active: selectedDifficulty === 'beginner' }">
-              <input type="radio" v-model="selectedDifficulty" value="beginner" />
-              <span class="difficulty-content">
-                <span class="difficulty-title">初級</span>
-              </span>
-            </label>
-            <label class="difficulty-option" :class="{ active: selectedDifficulty === 'intermediate' }">
-              <input type="radio" v-model="selectedDifficulty" value="intermediate" />
-              <span class="difficulty-content">
-                <span class="difficulty-title">中級</span>
-              </span>
-            </label>
-            <label class="difficulty-option" :class="{ active: selectedDifficulty === 'advanced' }">
-              <input type="radio" v-model="selectedDifficulty" value="advanced" />
-              <span class="difficulty-content">
-                <span class="difficulty-title">高級</span>
-              </span>
-            </label>
+          <div class="section-row">
+            <label class="section-label">課程難易度：</label>
+            <div class="difficulty-options">
+              <label class="difficulty-option" :class="{ active: selectedDifficulty === 'beginner' }">
+                <input type="radio" v-model="selectedDifficulty" value="beginner" />
+                <span class="difficulty-content">
+                  <span class="difficulty-title">初級</span>
+                </span>
+              </label>
+              <label class="difficulty-option" :class="{ active: selectedDifficulty === 'intermediate' }">
+                <input type="radio" v-model="selectedDifficulty" value="intermediate" />
+                <span class="difficulty-content">
+                  <span class="difficulty-title">中級</span>
+                </span>
+              </label>
+              <label class="difficulty-option" :class="{ active: selectedDifficulty === 'advanced' }">
+                <input type="radio" v-model="selectedDifficulty" value="advanced" />
+                <span class="difficulty-content">
+                  <span class="difficulty-title">高級</span>
+                </span>
+              </label>
+            </div>
           </div>
         </div>
         
         <!-- 練習題選項 -->
         <div class="quiz-option-section">
-          <label class="section-label">學習選項：</label>
-          <div class="quiz-checkbox-container">
-            <label class="quiz-checkbox" :class="{ checked: includeQuiz }">
-              <input type="checkbox" v-model="includeQuiz" />
-              <span class="checkmark"></span>
-              <span class="checkbox-content">
-                <span class="checkbox-title">包含練習題</span>
-              </span>
-            </label>
+          <div class="section-row">
+            <label class="section-label">學習選項：</label>
+            <div class="quiz-checkbox-container">
+              <label class="quiz-checkbox" :class="{ checked: includeQuiz }">
+                <input type="checkbox" v-model="includeQuiz" />
+                <span class="checkmark"></span>
+                <span class="checkbox-content">
+                  <span class="checkbox-title">包含練習題</span>
+                </span>
+              </label>
+            </div>
           </div>
         </div>
         
@@ -322,8 +326,8 @@ const resetCourse = () => {
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background-color: #f8f9fa;
+  color: #2c3e50;
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
@@ -349,24 +353,24 @@ const resetCourse = () => {
 
 .initial-screen .course-header h1 {
   font-size: 2.2rem;
-  margin-bottom: 0.8rem;
-  color: white;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  margin: 0 0 0.8rem 0;
+  color: #2c3e50;
   font-weight: 700;
   letter-spacing: -0.5px;
+  text-align: center;
+  width: 100%;
 }
 
 .course-subtitle {
   font-size: 1rem;
-  opacity: 0.9;
+  color: #6c757d;
   margin-bottom: 0;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .input-container {
   background-color: rgba(255, 255, 255, 0.98);
   border-radius: 16px;
-  padding: 2rem;
+  padding: 2.2rem;
   box-shadow: 
     0 20px 40px rgba(0,0,0,0.1),
     0 8px 16px rgba(0,0,0,0.05),
@@ -374,7 +378,7 @@ const resetCourse = () => {
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.2);
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   position: relative;
   z-index: 1;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -389,7 +393,7 @@ const resetCourse = () => {
 }
 
 .input-section {
-  margin-bottom: 1.8rem;
+  margin-bottom: 2rem;
 }
 
 .input-label {
@@ -403,18 +407,18 @@ const resetCourse = () => {
 
 .input-field {
   width: 100%;
-  padding: 1.2rem;
+  padding: 1rem;
   border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
   resize: vertical;
   box-sizing: border-box;
   font-family: inherit;
   transition: all 0.3s ease;
   background-color: #fafbfc;
   color: #2c3e50;
-  line-height: 1.5;
-  min-height: 120px;
+  line-height: 1.4;
+  min-height: 90px;
 }
 
 .input-field:focus {
@@ -439,19 +443,19 @@ const resetCourse = () => {
 .submit-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 1.2rem 2.5rem;
+  padding: 0.9rem 2rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  min-width: 180px;
+  min-width: 140px;
   position: relative;
   overflow: hidden;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   box-shadow: 
-    0 4px 15px rgba(102, 126, 234, 0.3),
+    0 3px 12px rgba(102, 126, 234, 0.3),
     0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -494,17 +498,28 @@ const resetCourse = () => {
 }
 
 /* New styles for difficulty selection and quiz options */
-.difficulty-section, .quiz-option-section {
-  margin-bottom: 1.8rem;
+.difficulty-section {
+  margin-bottom: 2rem;
+}
+
+.quiz-option-section {
+  margin-bottom: 2.2rem;
+}
+
+.section-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
 }
 
 .section-label {
-  display: block;
   font-weight: 600;
   color: #2c3e50;
-  margin-bottom: 1rem;
   font-size: 1.1rem;
   letter-spacing: -0.2px;
+  white-space: nowrap;
+  margin: 0;
+  min-width: 100px;
 }
 
 /* Difficulty Options Styles */
@@ -517,15 +532,16 @@ const resetCourse = () => {
 .difficulty-option {
   display: flex;
   align-items: center;
-  padding: 0.8rem 1rem;
+  justify-content: center;
+  padding: 0.5rem 0.8rem;
   border: 2px solid #e9ecef;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   background-color: #fafbfc;
-  flex: 1;
-  justify-content: center;
+  min-width: 60px;
   text-align: center;
+  min-height: 44px;
 }
 
 .difficulty-option:hover {
@@ -548,14 +564,22 @@ const resetCourse = () => {
 .difficulty-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   flex: 1;
+  width: 100%;
 }
 
 .difficulty-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #2c3e50;
-  margin-bottom: 0.3rem;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .difficulty-desc {
@@ -581,13 +605,15 @@ const resetCourse = () => {
 .quiz-checkbox {
   display: flex;
   align-items: center;
-  padding: 1rem;
+  justify-content: center;
+  padding: 0.5rem 1rem;
   border: 2px solid #e9ecef;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   background-color: #fafbfc;
   position: relative;
+  min-height: 44px;
 }
 
 .quiz-checkbox:hover {
@@ -650,14 +676,22 @@ const resetCourse = () => {
 .checkbox-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   flex: 1;
+  width: 100%;
 }
 
 .checkbox-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #2c3e50;
-  margin-bottom: 0.3rem;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .checkbox-desc {
