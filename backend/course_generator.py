@@ -49,14 +49,11 @@ class CourseGenerator:
             }
             difficulty_chinese = difficulty_map.get(request.difficulty, "中級")
             
-            # 將 includeQuiz 轉換為中文
-            include_quiz_chinese = "包含練習題" if request.includeQuiz else "不包含練習題"
-            
             # 準備要發送給 webhook 的資料
             webhook_data = {
                 "主題": request.topic,
                 "難度": difficulty_chinese,
-                "練習題": include_quiz_chinese
+                "練習題": request.includeQuiz
             }
             
             print(f"收到課程生成請求: {webhook_data}")
