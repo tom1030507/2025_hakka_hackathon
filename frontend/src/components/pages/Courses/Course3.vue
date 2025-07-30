@@ -55,8 +55,8 @@ const error = ref(null);
 const progress = ref(0); // 新增進度條狀態
 let progressInterval = null; // 用於清除定時器
 
-// Backend server address - use environment variable or fallback to localhost
-const backendBaseUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000';
+// Backend server address
+const backendBaseUrl = import.meta.env.VITE_BACKEND_BASE_URL || 'http://127.0.0.1:8000';
 
 const fullAudioUrl = computed(() => {
   return audioUrl.value ? `${backendBaseUrl}${audioUrl.value}` : null;
@@ -91,10 +91,13 @@ const fetchNewsAndAudio = async () => {
   startFakeProgress(); // 開始模擬進度
 
   try {
-    const response = await axios.get(`${backendBaseUrl}/api/news_with_audio`);
-    if (response.data) {
-      newsContent.value = response.data.news || [];
-      audioUrl.value = response.data.audio_url || null;
+    const response_news = await axios.get(`${backendBaseUrl}/api/news`);
+    if (response_news.data) {
+      newsContent.value = response_news.data.news || [];
+      const response_audio = await axios.get(`${backendBaseUrl}/api/audio`);
+      if (response_audio.data) {
+        audioUrl.value = response_audio.data.audio_url || null;
+      }
       if (newsContent.value.length === 0) {
           error.value = '未找到新聞內容。';
       }
@@ -270,4 +273,3 @@ h1 {
   left: 0;
 }
 </style>
-
