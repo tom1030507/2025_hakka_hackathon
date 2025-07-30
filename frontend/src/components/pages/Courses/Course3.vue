@@ -98,7 +98,6 @@ const fetchNewsAndAudio = async () => {
       if (response_audio.data) {
         audioUrl.value = response_audio.data.audio_url || null;
       }
-      // audioUrl.value = response.data.audio_url || null;
       if (newsContent.value.length === 0) {
           error.value = '未找到新聞內容。';
       }
