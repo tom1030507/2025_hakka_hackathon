@@ -65,7 +65,7 @@ const progress = ref(0); // 新增進度條狀態
 let progressInterval = null; // 用於清除定時器
 
 // Backend server address
-const backendBaseUrl = 'http://127.0.0.1:8000';
+const backendBaseUrl = import.meta.env.VITE_BACKEND_BASE_URL || 'http://127.0.0.1:8000';
 
 const fullAudioUrl = computed(() => {
   return audioUrl.value ? `${backendBaseUrl}${audioUrl.value}` : null;
@@ -113,7 +113,6 @@ const fetchNewsAndAudio = async () => {
           text: s.text
         }))
       }
-      // audioUrl.value = response.data.audio_url || null;
       if (newsContent.value.length === 0) {
           error.value = '未找到新聞內容。';
       }

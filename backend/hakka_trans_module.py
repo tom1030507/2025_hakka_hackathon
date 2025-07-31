@@ -57,3 +57,7 @@ def hakka_translate(text, index):
         raise RuntimeError(f"API request failed: {e}")
     except ValueError as e:
         raise RuntimeError(f"Error: {e}")
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"API request failed: {e}")
+    except ValueError as e:
+        raise RuntimeError(f"Error: {e}")

@@ -60,7 +60,7 @@ def get_news():
         # 隨機選擇一則新聞
         news_url = random.choice(all_news_links[:10])
         
-        if not news_url: raise HTTPException(status_code=404, detail="News link not found")
+        
 
         res = requests.get(news_url, headers=headers, timeout=10, verify=False)
         res.raise_for_status()
