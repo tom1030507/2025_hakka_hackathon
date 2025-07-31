@@ -40,7 +40,7 @@ app.mount("/output", StaticFiles(directory="output"), name="output")
 
 
 @app.get("/api/news")
-def get_news_and_audio():
+def get_news():
     try:
         # 1. Clear temp folders
         hakka_tts_module.clear_folder("temp_audio")
@@ -103,8 +103,26 @@ def get_audio():
     try:
         with open("temp_audio/news.json", "r", encoding="utf-8") as f:
             news_content = json.load(f)
+
+        safe_title = re.sub(r'[\/*?:"<>|]', "", news_content[0])
+        output_mp3name = f"{safe_title[:50]}.mp3"
+        output_jsonname = f"{safe_title[:50]}.json"
+        audio_url = f"output/{urllib.parse.quote(output_mp3name)}"
+        json_url = f"output/{output_jsonname}"
+        if os.path.exists(urllib.parse.unquote(audio_url)) and os.path.exists(json_url):
+            print("memory")
+            with open(json_url, "r", encoding="utf-8") as f:
+                subtitle_blocks = json.load(f)
+            audio_url = f"/output/{urllib.parse.quote(output_mp3name)}"
+            return {
+                "status": "memory",
+                "audio_url": audio_url,
+                "subtitles": subtitle_blocks
+            }
+
         # 3. Generate audio segments
         # 4. Combine audio segments
+
 
         final_audio = AudioSegment.empty()
         pause = AudioSegment.silent(duration=500)
@@ -145,35 +163,43 @@ def get_audio():
                 "end": end_ms,
                 "text": paragraph
             })
+            
 
             final_audio += para_audio + pause
             current_time = end_ms + len(pause)
 
         # ===== 匯出合併音檔與字幕 =====
-        safe_title = re.sub(r'[\\/*?:"<>|]', '', news_content[0])
-        final_audio.export(f"output/{safe_title}.mp3", format="mp3")
-        print(f"✅ 已輸出語音：output/{safe_title}.mp3")
+        # safe_title = re.sub(r'[\\/*?:"<>|]', '', news_content[0])
+        # final_audio.export(f"output/{safe_title}.mp3", format="mp3")
+        
+        with open(json_url, "w", encoding="utf-8") as f:
+            json.dump(subtitle_blocks, f, ensure_ascii=False)
 
-        with open(f"output/{safe_title}.srt", "w", encoding="utf-8") as f:
-            for block in subtitle_blocks:
-                f.write(f"{block['index']}\n")
-                f.write(f"{hakka_tts_module.to_srt_time(block['start'])} --> {hakka_tts_module.to_srt_time(block['end'])}\n")
-                f.write(f"{block['text']}\n\n")
+        # with open(f"output/{safe_title}.srt", "w", encoding="utf-8") as f:
+        #     for block in subtitle_blocks:
+        #         f.write(f"{block['index']}\n")
+        #         f.write(f"{hakka_tts_module.to_srt_time(block['start'])} --> {hakka_tts_module.to_srt_time(block['end'])}\n")
+        #         f.write(f"{block['text']}\n\n")
 
-        print(f"✅ 已輸出字幕：output/{safe_title}.srt")
+        # print(f"✅ 已輸出字幕：output/{safe_title}.srt")
 
 
         
         # 5. Export final audio and return data
         if len(final_audio) > 0:
             safe_title = re.sub(r'[\/*?:"<>|]', "", news_content[0])
-            output_filename = f"{safe_title[:50]}.mp3"
-            final_audio.export(f"output/{output_filename}", format="mp3")
-            audio_url = f"/output/{urllib.parse.quote(output_filename)}"
+            output_mp3name = f"{safe_title[:50]}.mp3"
+            final_audio.export(f"output/{output_mp3name}", format="mp3")
+            print(f"✅ 已輸出語音：output/{output_mp3name}.mp3")
+            audio_url = f"/output/{urllib.parse.quote(output_mp3name)}"
         else:
             audio_url = None
-
-        return {"audio_url": audio_url}
+        
+        return {
+            "status": "done",
+            "audio_url": audio_url,
+            "subtitles": subtitle_blocks
+        }
 
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Error fetching news: {e}")
@@ -186,3 +212,10 @@ def get_audio():
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+
+
+# if __name__ == '__main__':
+#     news = get_news()
+#     result = get_audio()
+#     print(result)

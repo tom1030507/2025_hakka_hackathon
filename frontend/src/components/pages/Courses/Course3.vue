@@ -1,10 +1,12 @@
 <template>
   <div class="course-container">
+    
     <div class="header-controls">
       <h1>客家新聞語音閱讀</h1>
       <button @click="fetchNewsAndAudio" :disabled="loading" class="fetch-button">
         <span v-if="loading">載入中，請稍候...</span>
         <span v-else>讀取最新新聞</span>
+
       </button>
     </div>
     
@@ -20,8 +22,8 @@
 
     <div v-if="newsContent.length > 0" class="content-container">
       <div class="news-content">
-        <h2>{{ newsContent[0] }}</h2>
-        <p v-for="(paragraph, index) in newsContent.slice(1)" :key="index" class="news-paragraph">
+        <h2 :class="['h2', { active_h2: currentIndex === 0 }]">{{ newsContent[0] }}</h2>
+        <p v-for="(paragraph, index) in newsContent.slice(1)" :key="index" :class="['news-paragraph', { active: currentIndex-1 === index }]">
           {{ paragraph }}
         </p>
       </div>
@@ -29,9 +31,12 @@
 
     <div v-if="audioUrl" class="audio-player-fixed-bottom">
       <div class="audio-player-container">
-        <audio controls :src="fullAudioUrl" class="audio-player">
+        <audio controls :src="fullAudioUrl" class="audio-player"
+          ref="audioRef"
+          @timeupdate="onTimeUpdate">
           您的瀏覽器不支援音訊播放。
         </audio>
+        
         <a :href="fullAudioUrl" download class="download-link">下載音檔</a>
       </div>
     </div>
@@ -47,6 +52,10 @@
 <script setup>
 import { ref, computed } from 'vue';
 import axios from 'axios';
+
+const subtitles = ref([]) // 來自後端字幕區間
+const currentIndex = ref(-2)
+const audioRef = ref(null)
 
 const loading = ref(false);
 const newsContent = ref([]);
@@ -88,6 +97,7 @@ const fetchNewsAndAudio = async () => {
   error.value = null;
   newsContent.value = [];
   audioUrl.value = null;
+  currentIndex.value = -2;
   startFakeProgress(); // 開始模擬進度
 
   try {
@@ -97,6 +107,11 @@ const fetchNewsAndAudio = async () => {
       const response_audio = await axios.get(`${backendBaseUrl}/api/audio`);
       if (response_audio.data) {
         audioUrl.value = response_audio.data.audio_url || null;
+        subtitles.value = response_audio.data.subtitles.map(s => ({
+          start: s.start / 1000,
+          end: s.end / 1000,
+          text: s.text
+        }))
       }
       if (newsContent.value.length === 0) {
           error.value = '未找到新聞內容。';
@@ -112,6 +127,17 @@ const fetchNewsAndAudio = async () => {
     loading.value = false;
   }
 };
+
+function onTimeUpdate() {
+  const t = audioRef.value.currentTime
+  console.log('目前播放時間:', t.toFixed(2))
+  const index = subtitles.value.findIndex(
+    (s) => t >= s.start && t <= s.end
+  )
+  currentIndex.value = index
+  console.log('目前字幕 index:', index)
+}
+
 </script>
 
 <style scoped>
@@ -172,7 +198,22 @@ h1 {
 }
 
 .news-content h2 {
+  /* color: #2c3e50; */
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.h2 {
   color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.active_h2 {
+  background-color: #ffeaea;
+  color: rgb(137, 27, 7);
   margin-bottom: 1rem;
   font-size: 1.8rem;
   text-align: center;
@@ -184,6 +225,16 @@ h1 {
   margin-bottom: 1rem;
   text-align: justify;
   line-height: 1.8;
+}
+
+.active {
+  /* font-size: 1.1rem; */
+  background-color: #ffeaea;
+  color: rgb(137, 27, 7);
+  /* margin-bottom: 1rem; */
+  font-weight: bold;
+  /* text-align: justify;
+  line-height: 1.8; */
 }
 
 .audio-player-fixed-bottom {
