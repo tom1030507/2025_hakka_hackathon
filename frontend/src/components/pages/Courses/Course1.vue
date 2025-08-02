@@ -13,14 +13,45 @@
       <div v-if="currentSection === 'flashcard'" id="flashcard-section">
         <div id="card">
           <p id="chinese" class="big">{{ cards[currentCard].chinese }}</p>
-          <p id="hakka" class="roman">{{ cards[currentCard].hakka }}</p>
-          <button @click="playAudio(cards[currentCard].audio)" :disabled="!cards[currentCard].audio">🔊 播放客語</button>
+          <div class="hakka-content">
+            <p id="hakka" class="roman">{{ cards[currentCard].hakka }}</p>
+            <!-- Hakka TTS Button -->
+            <div class="audio-section">
+              <button @click="playAudio(cards[currentCard].hakka, 'hakka')" :disabled="isPlayingAudio" class="audio-btn hakka-audio">
+                <span>{{ isPlayingAudio && currentAudioType === 'hakka' ? '播放中...' : '🔊 播放客語' }}</span>
+              </button>
+            </div>
+          </div>
         </div>
         <div class="nav">
           <button @click="prevCard">上一張</button>
           <button @click="nextCard">下一張</button>
         </div>
         <p id="progress">第 {{ currentCard + 1 }} / {{ cards.length }} 張</p>
+      </div>
+
+      <!-- Quiz Section -->
+      <div v-if="currentSection === 'quiz'" id="quiz-section">
+        <p id="quiz-question" class="big">{{ currentQuizQuestion.chinese }}</p>
+        
+        <!-- Audio button for quiz question -->
+        <div class="quiz-audio-section">
+          <button @click="playAudio(currentQuizQuestion.hakka, 'hakka')" :disabled="isPlayingAudio" class="audio-btn hakka-audio">
+            <span>{{ isPlayingAudio && currentAudioType === 'hakka' ? '播放中...' : '🔊 播放客語' }}</span>
+          </button>
+        </div>
+        
+        <div id="quiz-options">
+          <button 
+            v-for="(option, index) in quizOptions" 
+            :key="index" 
+            @click="selectOption(option)"
+            :style="option.style">
+            {{ option.hakka }}
+          </button>
+        </div>
+        <button @click="nextQuizQuestion">下一題</button>
+        <p id="quiz-score">目前得分：{{ quizScore }}</p>
       </div>
 
       <!-- Translate Section -->
@@ -33,281 +64,415 @@
               v-model="chineseInput" 
               placeholder="請輸入要翻譯的中文..."
               rows="3"
-              @input="onInputChange"
-            ></textarea>
+              :disabled="isTranslating">
+            </textarea>
           </div>
           
           <div class="translate-button-section">
-            <button @click="translateText" :disabled="!chineseInput.trim()" class="translate-btn">翻譯成客語</button>
+            <button class="translate-btn" @click="translateSingleText" :disabled="isTranslating || !chineseInput.trim()">
+              <span>{{ isTranslating ? '翻譯中...' : '翻譯成客語' }}</span>
+            </button>
           </div>
           
-          <div class="result-section" v-if="translationResult.show">
+          <div class="result-section" v-if="translationResult || translationError">
             <label class="result-label">客語翻譯：</label>
             <div id="translation-result">
-              <p class="hakka-text">{{ translationResult.hakka }}</p>
-              <button 
-                @click="playTranslationAudio" 
-                :disabled="!translationResult.audio"
-                class="audio-btn"
-              >🔊 播放客語</button>
+              <p v-if="translationResult" class="hakka-text success">{{ translationResult }}</p>
+              <p v-else-if="translationError" class="hakka-text error">{{ translationError }}</p>
+              
+              <!-- Audio button for translation results -->
+              <div v-if="translationResult" class="translation-audio-section">
+                <button class="audio-btn hakka-audio" @click="playAudio(translationResult, 'hakka')" :disabled="isPlayingAudio">
+                  <span>{{ isPlayingAudio && currentAudioType === 'hakka' ? '播放中...' : '🔊 播放客語' }}</span>
+                </button>
+              </div>
             </div>
           </div>
           
           <div class="history-section" v-if="translationHistory.length > 0">
             <h3>翻譯記錄</h3>
             <div class="history-list">
-              <div 
-                v-for="(item, index) in translationHistory" 
-                :key="index" 
-                class="history-item"
-                @click="loadHistoryItem(item)"
-              >
-                <div class="history-chinese">{{ item.chinese }}</div>
-                <div class="history-hakka">{{ item.hakka }}</div>
+              <div v-for="(item, index) in translationHistory" :key="index" class="history-item">
+                <div class="history-content" @click="loadHistoryItem(item)">
+                  <div class="history-chinese">{{ item.chinese }}</div>
+                  <div class="history-hakka">{{ item.hakka }}</div>
+                  <div class="history-timestamp">{{ item.timestamp }}</div>
+                </div>
+                <div class="history-audio-controls">
+                  <button class="history-audio-btn hakka" @click="playAudio(item.hakka, 'hakka')" :disabled="isPlayingAudio" title="播放客語">
+                    <span>🔊</span>
+                  </button>
+                </div>
               </div>
             </div>
-            <button @click="clearHistory" class="clear-btn">清除記錄</button>
+            <button class="clear-btn" @click="clearHistory">清除記錄</button>
           </div>
         </div>
-      </div>
-
-      <!-- Quiz Section -->
-      <div v-if="currentSection === 'quiz'" id="quiz-section">
-        <template v-if="quizIndex < quizOrder.length">
-          <p id="quiz-question" class="big">「{{ cards[quizOrder[quizIndex]].chinese }}」的客語是？</p>
-          <button @click="playAudio(cards[quizOrder[quizIndex]].audio)" :disabled="!cards[quizOrder[quizIndex]].audio">🔊 播放客語</button>
-          <div id="quiz-options">
-            <button v-for="option in quizOptions" :key="option" @click="checkQuizAnswer(option, cards[quizOrder[quizIndex]].hakka)" :style="option.style">{{ option.text }}</button>
-          </div>
-          <button @click="nextQuizQuestion" :disabled="!quizAnswered">下一題</button>
-          <p id="quiz-score">目前得分：{{ quizScore }}</p>
-        </template>
-        <template v-else>
-          <p id="quiz-question" class="big">測驗完成！</p>
-          <p id="quiz-score">總得分：{{ quizScore }} / {{ cards.length }}</p>
-        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
 
-const cards = ref([
-  { chinese: "你好", hakka: "ngi ho", audio: "/audio/ngi_ho.m4a" },
-  { chinese: "謝謝", hakka: "an zii se", audio: "/audio/an_zii_se.m4a" },
-  { chinese: "再見", hakka: "zai jien", audio: "/audio/zai_jien.mp3" },
-  { chinese: "早安", hakka: "zao an", audio: "/audio/zao_an.mp3" },
-  { chinese: "午安", hakka: "ngou an", audio: "/audio/ngou_an.mp3" },
-  { chinese: "晚安", hakka: "ban an", audio: "/audio/ban_an.mp3" },
-  { chinese: "水", hakka: "chui", audio: "/audio/chui.mp3" },
-  { chinese: "火", hakka: "foi", audio: "/audio/foi.mp3" },
-  { chinese: "吃", hakka: "sik", audio: "/audio/sik.mp3" },
-  { chinese: "喝", hakka: "ham", audio: "/audio/ham.mp3" },
-  { chinese: "學習", hakka: "hok sip", audio: "/audio/hok_sip.mp3" },
-  { chinese: "請", hakka: "qin", audio: "/audio/qin.mp3" },
-  { chinese: "對不起", hakka: "te pu qi", audio: "/audio/te_pu_qi.mp3" },
-  { chinese: "是", hakka: "si", audio: "/audio/si.mp3" },
-  { chinese: "不是", hakka: "m si", audio: "/audio/m_si.mp3" },
-  { chinese: "飯", hakka: "pan", audio: "/audio/pan.mp3" },
-  { chinese: "買", hakka: "mai", audio: "/audio/mai.mp3" },
-  { chinese: "賣", hakka: "mai vun", audio: "/audio/mai_vun.mp3" },
-  { chinese: "貴", hakka: "gui", audio: "/audio/gui.mp3" },
-  { chinese: "便宜", hakka: "pien yi", audio: "/audio/pien_yi.mp3" },
-  { chinese: "這個", hakka: "li ge", audio: "/audio/li_ge.mp3" },
-  { chinese: "那個", hakka: "ga ge", audio: "/audio/ga_ge.mp3" },
-  { chinese: "在哪裡", hakka: "di bin du", audio: "/audio/di_bin_du.mp3" },
-  { chinese: "多少", hakka: "toi to", audio: "/audio/toi_to.mp3" },
-  { chinese: "我", hakka: "ngai", audio: "/audio/ngai.mp3" },
-  { chinese: "你", hakka: "ngi", audio: "/audio/ngi.mp3" },
-  { chinese: "他", hakka: "hi", audio: "/audio/hi.mp3" },
-  { chinese: "我們", hakka: "ngai do", audio: "/audio/ngai_do.mp3" },
-  { chinese: "今天", hakka: "gim zhin", audio: "/audio/gim_zhin.mp3" },
-  { chinese: "明天", hakka: "me gin", audio: "/audio/me_gin.mp3" },
-  { chinese: "好", hakka: "ho", audio: "/audio/ho.mp3" },
-  { chinese: "不用客氣", hakka: "m yong hak qi", audio: "/audio/m_yong_hak_qi.mp3" },
-  { chinese: "聽不懂", hakka: "ngai m dong", audio: "/audio/ngai_m_dong.mp3" },
-  { chinese: "我愛你", hakka: "ngai oi ngi", audio: "/audio/ngai_oi_ngi.mp3" },
-  { chinese: "你食飽無？", hakka: "ngi sik pan mo?", audio: "/audio/ngi_sik_pan_mo.mp3" },
-  { chinese: "這個多少錢？", hakka: "li ge toi to ngien?", audio: "/audio/li_ge_toi_to_ngien.mp3" },
-  { chinese: "請再說一次。", hakka: "qin zoi so it ci.", audio: "/audio/qin_zoi_so_it_ci.mp3" },
-  { chinese: "我聽不懂客語。", hakka: "ngai m dong hak ngi.", audio: "/audio/ngai_m_dong_hak_ngi.mp3" },
-  { chinese: "謝謝你幫忙！", hakka: "to sia ngi bong mang!", audio: "/audio/to_sia_ngi_bong_mang.mp3" }
-]);
+// API Configuration
+const API_BASE_URL = 'http://127.0.0.1:8000';
 
-const currentCard = ref(parseInt(localStorage.getItem('hakkaCard')) || 0);
-const audioPlayer = new Audio();
+// Tab switching
 const currentSection = ref('flashcard');
-
-const quizOrder = ref([]);
-const quizIndex = ref(0);
-const quizScore = ref(0);
-const quizOptions = ref([]);
-const quizAnswered = ref(false);
-
-// Translation section variables
-const chineseInput = ref('');
-const translationResult = ref({
-  show: false,
-  hakka: '',
-  audio: null
-});
-const translationHistory = ref([]);
-
-function loadCard() {
-  if (currentCard.value < 0) currentCard.value = 0;
-  if (currentCard.value >= cards.value.length) currentCard.value = cards.value.length - 1;
-  localStorage.setItem('hakkaCard', currentCard.value);
+function showSection(section) {
+  currentSection.value = section;
 }
 
-function playAudio(audioSrc) {
-  if (audioSrc) {
-    audioPlayer.src = audioSrc;
-    audioPlayer.play();
-  }
+// Audio state management
+const isPlayingAudio = ref(false);
+const currentAudioType = ref('');
+const currentAudio = ref(null);
+
+// Flashcard data and functions
+const cards = ref([
+  { chinese: "你好", hakka: "你好" },
+  { chinese: "謝謝", hakka: "恁仔細" },
+  { chinese: "再見", hakka: "正來尞" },
+  { chinese: "早安", hakka: "恁早啊" },
+  { chinese: "午安", hakka: "當晝好" },
+  { chinese: "晚安", hakka: "暗安" },
+  { chinese: "水", hakka: "水" },
+  { chinese: "火", hakka: "火" },
+  { chinese: "吃", hakka: "食" },
+  { chinese: "喝", hakka: "食" },
+  { chinese: "學習", hakka: "學習" },
+  { chinese: "請", hakka: "請" },
+  { chinese: "對不起", hakka: "失禮啦" },
+  { chinese: "是", hakka: "係" },
+  { chinese: "不是", hakka: "毋係" },
+  { chinese: "朋友", hakka: "朋友" },
+  { chinese: "家人", hakka: "屋下人" },
+  { chinese: "學校", hakka: "學校" },
+  { chinese: "工作", hakka: "食頭路" },
+  { chinese: "家", hakka: "屋下" },
+  { chinese: "今天", hakka: "今晡日" },
+  { chinese: "明天", hakka: "天光日" },
+  { chinese: "昨天", hakka: "昨晡日" },
+  { chinese: "好吃", hakka: "好食" },
+  { chinese: "快樂", hakka: "快樂" },
+  { chinese: "累", hakka: "𤸁" },
+  { chinese: "走", hakka: "來去" },
+  { chinese: "跑", hakka: "走" },
+  { chinese: "看", hakka: "看" },
+  { chinese: "聽", hakka: "聽" },
+  { chinese: "你在哪裡？", hakka: "你在哪啊？" },
+  { chinese: "我很餓。", hakka: "𠊎當肚飢。" },
+  { chinese: "今天天氣很好。", hakka: "今晡日天時當好。" },
+  { chinese: "我愛你。", hakka: "𠊎愛你。" },
+  { chinese: "可以幫我嗎？", hakka: "做得摎𠊎𢯭手無？" },
+  { chinese: "這是什麼？", hakka: "這係麼个啊？" },
+  { chinese: "我去市場。", hakka: "𠊎去市場。" },
+  { chinese: "時間到了。", hakka: "時間到吔。" },
+  { chinese: "我累了。", hakka: "𠊎𤸁吔啦。" },
+  { chinese: "晚餐吃什麼？", hakka: "暗晡夜食麼个呢？" },
+  { chinese: "現在幾點？", hakka: "這下幾多點？" },
+  { chinese: "我需要幫助。", hakka: "𠊎需要𢯭手。" },
+  { chinese: "你在做什麼？", hakka: "你在該做麼个？" },
+  { chinese: "請慢一點說。", hakka: "請過慢啊講。" },
+  { chinese: "這多少錢？", hakka: "這幾多錢？" },
+  { chinese: "我很高興見到你。", hakka: "𠊎當歡喜看著你。" },
+  { chinese: "我們去哪裡？", hakka: "𫣆來去哪啊？" },
+  { chinese: "請等一下。", hakka: "請等一下。" },
+  { chinese: "我不知道。", hakka: "𠊎毋知呢。" },
+  { chinese: "明天見！", hakka: "天光日見喔！" },
+]);
+const currentCard = ref(0);
+
+function nextCard() {
+  currentCard.value = (currentCard.value + 1) % cards.value.length;
 }
 
 function prevCard() {
   currentCard.value = (currentCard.value - 1 + cards.value.length) % cards.value.length;
-  loadCard();
 }
 
-function nextCard() {
-  currentCard.value = (currentCard.value + 1) % cards.value.length;
-  loadCard();
-}
+async function playAudio(text, voiceType = 'hakka') {
+  if (!text || isPlayingAudio.value) return;
+  
+  try {
+    isPlayingAudio.value = true;
+    currentAudioType.value = voiceType;
+    
+    console.log(`Playing ${voiceType} audio for:`, text);
+    
+    if (currentAudio.value) {
+      currentAudio.value.pause();
+      currentAudio.value = null;
+    }
+    
+    const response = await fetch(`${API_BASE_URL}/api/tts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: text,
+        voice_type: voiceType
+      })
+    });
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    if (!response.ok) {
+      throw new Error(`TTS API error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('TTS response:', data);
+
+    if (data.success && data.audio_url) {
+      const audio = new Audio(`${API_BASE_URL}${data.audio_url}`);
+      currentAudio.value = audio;
+      
+      audio.onended = () => {
+        isPlayingAudio.value = false;
+        currentAudioType.value = '';
+        currentAudio.value = null;
+      };
+      
+      audio.onerror = (error) => {
+        console.error('Audio playback error:', error);
+        isPlayingAudio.value = false;
+        currentAudioType.value = '';
+        currentAudio.value = null;
+        alert('音頻播放失敗');
+      };
+      
+      await audio.play();
+      console.log('✅ Audio playback started');
+      
+    } else {
+      throw new Error(data.error_message || 'TTS generation failed');
+    }
+    
+  } catch (error) {
+    console.error('Audio playback error:', error);
+    isPlayingAudio.value = false;
+    currentAudioType.value = '';
+    currentAudio.value = null;
+    alert(`音頻播放失敗: ${error.message}`);
   }
-  return array;
 }
 
-function generateOptions(correctIdx) {
-  const options = [{ text: cards.value[correctIdx].hakka, correct: true }];
-  const indices = [...Array(cards.value.length).keys()].filter(i => i !== correctIdx);
-  shuffle(indices);
-  for (let i = 0; i < 3 && i < indices.length; i++) {
-    options.push({ text: cards.value[indices[i]].hakka, correct: false });
+// Quiz data and functions
+const currentQuizIndex = ref(0);
+const quizScore = ref(0);
+const quizOptions = ref([]);
+
+const currentQuizQuestion = computed(() => {
+  return cards.value[currentQuizIndex.value] || { chinese: '', hakka: '' };
+});
+
+function initializeQuiz() {
+  generateQuizQuestion();
+}
+
+function generateQuizQuestion() {
+  if (cards.value.length === 0) return;
+  
+  const correctAnswer = cards.value[currentQuizIndex.value];
+  if (!correctAnswer || !correctAnswer.hakka) {
+    nextQuizQuestion();
+    return;
   }
-  return shuffle(options);
-}
-
-function startQuiz() {
-  quizOrder.value = shuffle([...Array(cards.value.length).keys()]);
-  quizIndex.value = 0;
-  quizScore.value = 0;
-  loadQuizQuestion();
-}
-
-function loadQuizQuestion() {
-  quizAnswered.value = false;
-  if (quizIndex.value < quizOrder.value.length) {
-    const correctIdx = quizOrder.value[quizIndex.value];
-    quizOptions.value = generateOptions(correctIdx);
+  
+  const validCards = cards.value.filter((card, index) => 
+    index !== currentQuizIndex.value && 
+    card.hakka
+  );
+  
+  if (validCards.length < 3) {
+    alert('需要更多有效翻譯才能進行測驗');
+    return;
   }
+  
+  const shuffledWrong = validCards.sort(() => 0.5 - Math.random()).slice(0, 3);
+  
+  const options = [
+    { hakka: correctAnswer.hakka, isCorrect: true, style: {} },
+    ...shuffledWrong.map(card => ({ hakka: card.hakka, isCorrect: false, style: {} }))
+  ];
+  
+  quizOptions.value = options.sort(() => 0.5 - Math.random());
 }
 
-function checkQuizAnswer(option, correctAnswer) {
-  if (quizAnswered.value) return;
-
-  quizAnswered.value = true;
-  if (option.text === correctAnswer) {
+function selectOption(option) {
+  quizOptions.value.forEach(opt => {
+    if (opt.isCorrect) {
+      opt.style = { backgroundColor: '#9cff9c' };
+    } else if (opt === option && !opt.isCorrect) {
+      opt.style = { backgroundColor: '#ff9c9c' };
+    }
+  });
+  
+  if (option.isCorrect) {
     quizScore.value++;
-    option.style = { backgroundColor: '#9cff9c' };
-  } else {
-    option.style = { backgroundColor: '#ff9c9c' };
   }
 }
 
 function nextQuizQuestion() {
-  quizIndex.value++;
-  loadQuizQuestion();
+  quizOptions.value.forEach(opt => {
+    opt.style = {};
+  });
+  
+  currentQuizIndex.value = (currentQuizIndex.value + 1) % cards.value.length;
+  generateQuizQuestion();
 }
 
-function showSection(section) {
-  currentSection.value = section;
-  if (section === 'quiz') {
-    startQuiz();
+// Translation section
+const chineseInput = ref('');
+const translationResult = ref('');
+const translationError = ref('');
+const isTranslating = ref(false);
+const translationHistory = ref([]);
+
+async function translateSingleText() {
+  if (!chineseInput.value.trim() || isTranslating.value) return;
+  
+  isTranslating.value = true;
+  translationResult.value = '';
+  translationError.value = '';
+  
+  try {
+    console.log('Translating single text:', chineseInput.value);
+    
+    const response = await fetch(`${API_BASE_URL}/api/translate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: chineseInput.value.trim(),
+        index: `single_${Date.now()}`
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Single translation response:', data);
+
+    if (data.success && data.translation_result) {
+      const hakkaText = extractTranslationText(data.translation_result);
+      
+      if (hakkaText) {
+        translationResult.value = hakkaText;
+        
+        translationHistory.value.unshift({
+          chinese: chineseInput.value.trim(),
+          hakka: hakkaText,
+          timestamp: new Date().toLocaleString('zh-TW')
+        });
+        
+        if (translationHistory.value.length > 10) {
+          translationHistory.value = translationHistory.value.slice(0, 10);
+        }
+        
+        console.log('✅ Single translation success:', hakkaText);
+      } else {
+        translationError.value = '翻譯結果格式錯誤';
+        console.log('❌ Translation format error:', data.translation_result);
+      }
+    } else {
+      translationError.value = data.error_message || '翻譯失敗';
+      console.log('❌ Translation failed:', data.error_message);
+    }
+  } catch (error) {
+    console.error('Single translation error:', error);
+    translationError.value = `翻譯失敗: ${error.message}`;
+  } finally {
+    isTranslating.value = false;
   }
 }
 
-// Translation functions
-function onInputChange() {
-  if (translationResult.value.show) {
-    translationResult.value.show = false;
-  }
-}
-
-function translateText() {
-  if (!chineseInput.value.trim()) return;
+function extractTranslationText(translationResult) {
+  if (!translationResult) return null;
   
-  // 模擬翻譯功能 - 這裡之後可以替換成實際的翻譯邏輯
-  const inputText = chineseInput.value.trim();
-  
-  // 檢查是否在現有單字卡中有匹配的翻譯
-  const foundCard = cards.value.find(card => card.chinese === inputText);
-  
-  if (foundCard) {
-    translationResult.value = {
-      show: true,
-      hakka: foundCard.hakka,
-      audio: foundCard.audio
-    };
-  } else {
-    // 如果沒找到，顯示預設訊息
-    translationResult.value = {
-      show: true,
-      hakka: '抱歉，暫時無法翻譯此詞彙',
-      audio: null
-    };
+  if (typeof translationResult === 'string') {
+    return translationResult.trim();
   }
   
-  // 添加到翻譯記錄
-  const historyItem = {
-    chinese: inputText,
-    hakka: translationResult.value.hakka,
-    audio: translationResult.value.audio
-  };
-  
-  // 避免重複記錄
-  const existingIndex = translationHistory.value.findIndex(item => item.chinese === inputText);
-  if (existingIndex !== -1) {
-    translationHistory.value.splice(existingIndex, 1);
+  if (translationResult.output) {
+    return translationResult.output.trim();
   }
   
-  translationHistory.value.unshift(historyItem);
+  if (translationResult.translation) {
+    return translationResult.translation.trim();
+  }
   
-  // 限制記錄數量
-  if (translationHistory.value.length > 10) {
-    translationHistory.value = translationHistory.value.slice(0, 10);
+  if (translationResult.result) {
+    return translationResult.result.trim();
   }
-}
-
-function playTranslationAudio() {
-  if (translationResult.value.audio) {
-    playAudio(translationResult.value.audio);
+  
+  if (typeof translationResult === 'object') {
+    const textFields = ['text', 'content', 'hakka', 'translated'];
+    for (const field of textFields) {
+      if (translationResult[field]) {
+        return translationResult[field].trim();
+      }
+    }
+    
+    const values = Object.values(translationResult);
+    for (const value of values) {
+      if (typeof value === 'string' && value.trim()) {
+        return value.trim();
+      }
+    }
   }
+  
+  return null;
 }
 
 function loadHistoryItem(item) {
   chineseInput.value = item.chinese;
-  translationResult.value = {
-    show: true,
-    hakka: item.hakka,
-    audio: item.audio
-  };
+  translationResult.value = item.hakka;
+  translationError.value = '';
 }
 
-function clearHistory() {
+async function cleanupTempAudio() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/tts/cleanup`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Cleanup API error! status: ${response.status}`);
+    }
+    
+    console.log('✅ Temporary audio files cleaned up');
+  } catch (error) {
+    console.error('Cleanup error:', error);
+  }
+}
+
+async function clearHistory() {
   translationHistory.value = [];
+  await cleanupTempAudio();
 }
 
+// Initialize quiz and add window unload event listener
 onMounted(() => {
-  loadCard();
+  console.log('Component mounted, initializing quiz...');
+  initializeQuiz();
+  
+  window.addEventListener('beforeunload', async () => {
+    await cleanupTempAudio();
+  });
+});
+
+// Remove event listener on component unmount
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', cleanupTempAudio);
 });
 </script>
 
@@ -320,9 +485,9 @@ onMounted(() => {
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  display: flex; /* Use flexbox to center content */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Background overlay */
@@ -346,7 +511,7 @@ onMounted(() => {
   box-shadow: 0 8px 32px rgba(0,0,0,0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-top: -10vh; /* Increased from -5vh to move content further upward */
+  margin-top: -10vh;
 }
 
 h1 {
@@ -398,6 +563,14 @@ h1 {
   margin: 0.3em 0 1em 0;
 }
 
+.hakka-content {
+  background-color: rgba(248, 249, 250, 0.9);
+  border: 2px solid rgba(224, 224, 224, 0.8);
+  border-radius: 8px;
+  padding: 1em;
+  margin: 0.5em 0;
+}
+
 button {
   margin: 0.4em;
   padding: 0.6em 1.2em;
@@ -416,6 +589,47 @@ button:hover:not(:disabled) {
 button:disabled {
   background-color: rgba(204, 204, 204, 0.7);
   cursor: not-allowed;
+}
+
+/* Audio Section Styles */
+.audio-section, .quiz-audio-section {
+  margin: 1em 0;
+  text-align: center;
+}
+
+.audio-btn {
+  margin: 0.3em;
+  padding: 0.6em 1.2em;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.audio-btn.hakka-audio {
+  background-color: #28a745;
+  color: white;
+}
+
+.audio-btn.hakka-audio:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.audio-btn:disabled {
+  background-color: rgba(204, 204, 204, 0.7);
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.translation-audio-section {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+  margin-top: 1em;
 }
 
 .nav {
@@ -464,6 +678,11 @@ button:disabled {
   border-color: #d6336c;
 }
 
+#chinese-input:disabled {
+  background-color: rgba(245, 245, 245, 0.9);
+  cursor: not-allowed;
+}
+
 .translate-button-section {
   text-align: center;
   margin-bottom: 1.5em;
@@ -484,6 +703,17 @@ button:disabled {
 .translate-btn:disabled {
   background-color: rgba(204, 204, 204, 0.7);
   color: #888;
+  cursor: not-allowed;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.translate-btn:disabled span {
+  animation: pulse 1.5s infinite;
 }
 
 .result-section {
@@ -500,20 +730,18 @@ button:disabled {
 
 .hakka-text {
   font-size: 1.4rem;
-  color: #2c5aa0;
   font-weight: bold;
   margin: 0 0 0.8em 0;
 }
 
-.audio-btn {
-  background-color: #28a745;
-  color: white;
-  font-size: 1rem;
-  padding: 0.6em 1.5em;
+.hakka-text.error {
+  color: #dc3545;
+  font-weight: normal;
 }
 
-.audio-btn:hover:not(:disabled) {
-  background-color: #218838;
+.hakka-text.success {
+  color: #2c5aa0;
+  font-weight: bold;
 }
 
 .history-section {
@@ -540,12 +768,19 @@ button:disabled {
   border-radius: 6px;
   padding: 0.8em;
   margin-bottom: 0.5em;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1em;
   transition: background-color 0.2s;
 }
 
 .history-item:hover {
   background-color: rgba(233, 236, 239, 0.9);
+}
+
+.history-content {
+  flex: 1;
+  cursor: pointer;
 }
 
 .history-chinese {
@@ -560,6 +795,47 @@ button:disabled {
   font-style: italic;
 }
 
+.history-timestamp {
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 0.3em;
+}
+
+.history-audio-controls {
+  display: flex;
+  gap: 0.3em;
+}
+
+.history-audio-btn {
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: all 0.2s;
+  margin: 0;
+  padding: 0;
+}
+
+.history-audio-btn.hakka {
+  background-color: #28a745;
+  color: white;
+}
+
+.history-audio-btn.hakka:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.history-audio-btn:disabled {
+  background-color: rgba(204, 204, 204, 0.7);
+  cursor: not-allowed;
+}
+
 .clear-btn {
   background-color: #dc3545;
   color: white;
@@ -569,5 +845,45 @@ button:disabled {
 
 .clear-btn:hover {
   background-color: #c82333;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .container {
+    max-width: 90%;
+    padding: 1.5em;
+    margin-top: -5vh;
+  }
+  
+  .tabs button {
+    margin: 0.2em;
+    padding: 0.4em 0.8em;
+    font-size: 0.9rem;
+  }
+  
+  .big {
+    font-size: 1.4rem;
+  }
+  
+  .roman {
+    font-size: 1.1rem;
+  }
+  
+  .translation-audio-section {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5em;
+  }
+  
+  .history-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5em;
+  }
+  
+  .history-audio-controls {
+    align-self: center;
+    margin-top: 0.5em;
+  }
 }
 </style>
