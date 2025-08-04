@@ -174,6 +174,7 @@ watch(currentDayIndex, (newDayIndex) => {
   display: flex;
   gap: 2rem;
   align-items: flex-start;
+  padding-left: 2rem;
 }
 
 #workout-card {
