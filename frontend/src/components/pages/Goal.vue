@@ -9,9 +9,8 @@ const props = defineProps({
 const currentDayIndex = computed(() => parseInt(props.dayIndex));
 
 const displayDate = computed(() => {
-  const date = new Date();
-  date.setDate(date.getDate() + currentDayIndex.value);
-  return date.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+  const dayNumber = currentDayIndex.value + 1;
+  return `Day${dayNumber < 10 ? '0' + dayNumber : dayNumber}`;
 });
 
 const activities = ref({
