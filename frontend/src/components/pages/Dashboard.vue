@@ -65,69 +65,113 @@
 
 <template>
     <section id="dashboard">
-        <div class="dashboard-content">
-            <div class="card tip-container">
-                <h2>讀書計畫</h2>
-                <p>{{ today }}</p>
-                <div>
-                    <p class="tip"><strong>Daily Tip</strong><br/>{{ todaysFact }}</p>
+        <div class="dashboard-background"></div>
+        <div class="dashboard-overlay"></div>
+        <div class="dashboard-wrapper">
+            <div class="dashboard-content">
+                <div class="card tip-container">
+                    <h2>學習計畫</h2>
+                    <p>{{ today }}</p>
+                    <div>
+                        <p class="tip"><strong>Daily Tip</strong><br/>{{ todaysFact }}</p>
+                    </div>
                 </div>
+                <Grid v-bind="props"  />
             </div>
-            <Grid v-bind="props"  />
+            <aside class="progress-container">
+                <!-- <h3>7天完成率</h3> -->
+                <svg class="progress-ring" width="200" height="200">
+                    <circle class="progress-ring__circle-bg" stroke="#eee" stroke-width="15" fill="transparent" r="90" cx="100" cy="100"/>
+                    <circle class="progress-ring__circle" 
+                            stroke="var(--color-link)" 
+                            stroke-width="15" 
+                            fill="transparent" 
+                            r="90" 
+                            cx="100" 
+                            cy="100"
+                            :stroke-dasharray="circumference"
+                            :stroke-dashoffset="strokeOffset" />
+                    <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="progress-text">{{ props.sevenDayCompletionRate }}%</text>
+                </svg>
+                <div class="todo-list-container card">
+                    <h4>所有待辦 (未完成)</h4>
+                    <ul v-if="incompleteAllActivities.length > 0">
+                        <li v-for="(activity, index) in incompleteAllActivities" :key="index">
+                            <span>{{ activity.text }}</span>
+                        </li>
+                    </ul>
+                    <p v-else>目前沒有未完成的待辦事項！</p>
+                    
+                    
+                </div>
+            </aside>
         </div>
-        <aside class="progress-container">
-            <!-- <h3>7天完成率</h3> -->
-            <svg class="progress-ring" width="200" height="200">
-                <circle class="progress-ring__circle-bg" stroke="#eee" stroke-width="15" fill="transparent" r="90" cx="100" cy="100"/>
-                <circle class="progress-ring__circle" 
-                        stroke="var(--color-link)" 
-                        stroke-width="15" 
-                        fill="transparent" 
-                        r="90" 
-                        cx="100" 
-                        cy="100"
-                        :stroke-dasharray="circumference"
-                        :stroke-dashoffset="strokeOffset" />
-                <text x="50%" y="50%" text-anchor="middle" dy=".3em" class="progress-text">{{ props.sevenDayCompletionRate }}%</text>
-            </svg>
-            <div class="todo-list-container card">
-                <h4>所有待辦 (未完成)</h4>
-                <ul v-if="incompleteAllActivities.length > 0">
-                    <li v-for="(activity, index) in incompleteAllActivities" :key="index">
-                        <span>{{ activity.text }}</span>
-                    </li>
-                </ul>
-                <p v-else>目前沒有未完成的待辦事項！</p>
-                
-                
-            </div>
-        </aside>
     </section>
 </template>
 
 <style scoped>
     #dashboard {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    .dashboard-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/images/dashboard_pic.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -2;
+    }
+
+    .dashboard-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.85) 100%);
+        z-index: -1;
+    }
+
+    .dashboard-wrapper {
+        position: relative;
+        z-index: 1;
         display: flex;
         gap: 2rem;
-        flex-direction: row; /* Changed to row to place content and progress side-by-side */
-        align-items: flex-start; /* Align items to the top */
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 2rem;
+        min-height: 100vh;
     }
 
     .dashboard-content {
-        flex: 3; /* Takes 3/5 of the space */
+        flex: 3;
         display: flex;
         flex-direction: column;
         gap: 2rem;
     }
 
     .progress-container {
-        flex: 2; /* Takes 2/5 of the space */
+        flex: 2;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start; /* Align to the top */
+        justify-content: flex-start;
         gap: 1rem;
-        padding-top: 1rem; /* Add some padding to push it down slightly */
+        padding-top: 1rem;
+    }
+
+    .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
     .tip-container,
@@ -139,6 +183,8 @@
         flex-direction: column;
         gap: 2rem;
         height: 240px; 
+        padding: 2rem;
+        border-radius: 12px;
     }
 
     @media (min-width: 640px) {
@@ -163,18 +209,19 @@
         width: 100%;
         margin-top: 2rem;
         padding: 1rem;
+        border-radius: 12px;
     }
 
     .task-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-top: 1rem;
     }
 
     .add-task {
-    display: flex;
-    gap: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
     }
 
     .add-task-container {
@@ -182,36 +229,54 @@
     }
 
     ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
     }
 
     li {
-    background-color: var(--background-muted);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    margin-bottom: 0.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+        background-color: rgba(248, 250, 252, 0.8);
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(5px);
     }
 
     li.completed span {
-    text-decoration: line-through;
-    color: #888;
+        text-decoration: line-through;
+        color: #888;
     }
 
     .complete-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    font-size: 1.2rem;
-    color: #888;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        font-size: 1.2rem;
+        color: #888;
     }
 
     .complete-btn:hover {
-    color: var(--color-link);
+        color: var(--color-link);
+    }
+
+    h2, h4, p {
+        color: #1a202c;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-wrapper {
+            flex-direction: column;
+            padding: 1rem;
+        }
+        
+        .dashboard-content,
+        .progress-container {
+            flex: 1;
+        }
     }
 </style>

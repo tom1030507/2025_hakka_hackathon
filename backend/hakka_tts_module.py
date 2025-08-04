@@ -62,6 +62,23 @@ def generate_hakka_wav(text, index):
 
     tts(url, username, password, ttsUrl, out_path, text)
 
+
+def generate_hakka_wav2(text, index):
+    # 從環境變數中讀取憑證
+    url = os.getenv("HAKKA_TTS_URL_BASE", "")
+    ttsUrl = os.getenv("HAKKA_TTS_URL_TTS", "")
+    username = os.getenv("HAKKA_TTS_USERNAME", "")
+    password = os.getenv("HAKKA_TTS_PASSWORD", "")
+    out_path = f"tts_audio/{index}.wav"
+    
+    # 檢查憑證是否已設定
+    if not all([url, ttsUrl, username, password]):
+        print("警告：客語 TTS 憑證未設定，將跳過客語語音生成。")
+        raise ValueError("Hakka TTS credentials are not set.") # 拋出錯誤讓外層捕獲
+
+    tts(url, username, password, ttsUrl, out_path, text)
+
+
 def clear_folder(folder_path):
     if os.path.exists(folder_path):
         for filename in os.listdir(folder_path):

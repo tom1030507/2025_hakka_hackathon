@@ -21,9 +21,9 @@ dist-ssr/
 
 # Temporary audio files
 backend/temp_audio/
+backend/tts_audio/
+backend/temp_trans/
 backend/output/
-temp_audio/
-output/
 
 # Python cache
 backend/__pycache__/
