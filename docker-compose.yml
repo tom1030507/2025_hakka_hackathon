@@ -10,6 +10,7 @@ services:
     volumes:
       - ./backend/output:/app/output
       - ./backend/temp_audio:/app/temp_audio
+      - ./backend/tts_audio:/app/tts_audio
     env_file:
       - ./.env
     depends_on:

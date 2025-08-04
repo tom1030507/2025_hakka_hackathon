@@ -46,7 +46,7 @@ def hakka_translate(text, index):
         print(f"translate result : {response.text}")
 
         # Save translation result
-        output_dir = 'backend/temp_trans'
+        output_dir = 'temp_trans'
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, f'translation_{index}.json')
         print(output_path)
