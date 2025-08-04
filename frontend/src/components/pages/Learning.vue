@@ -42,7 +42,7 @@ const blocks = ref([
     id: 1, 
     text: '基礎客語學習與翻譯', 
     image: image1, 
-    route: '/Course/1',
+    route: '/course/1',
     description: '學習客語基礎發音和詞彙，以及常用的日常對話，並且提供中文與客語的翻譯功能。適合初學者建立客語基礎。'
   },
   { 

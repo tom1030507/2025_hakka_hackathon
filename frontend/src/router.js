@@ -2,7 +2,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Welcome from './components/pages/Welcome.vue';
 import Dashboard from './components/pages/Dashboard.vue';
-import Blank from './components/pages/Blank.vue';
 import Workout from './components/pages/Goal.vue';
 import Learning from './components/pages/Learning.vue';
 
