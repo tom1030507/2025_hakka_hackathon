@@ -23,10 +23,6 @@ const routes = [
     path: '/course/3',
     component: () => import('./components/pages/Courses/Course3.vue')
   },
-  {
-    path: '/course/4',
-    component: () => import('./components/pages/Courses/Course4.vue')
-  },
 ];
 
 const router = createRouter({
