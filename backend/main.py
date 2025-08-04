@@ -166,8 +166,18 @@ def get_news_and_audio():
         print(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
+def generate_english_mp3(text, out_path):
+    """Wrapper for gTTS to run it in a thread."""
+    try:
+        gTTS(text=text, lang='en').save(out_path)
+        print(f"🟢 gTTS 成功 ({os.path.basename(out_path)})")
+    except Exception as e:
+        print(f"❌ gTTS 失敗 ({os.path.basename(out_path)}): {e}")
+        # In case of failure, create a silent file so the concatenation doesn't fail.
+        AudioSegment.silent(duration=100).export(out_path, format="mp3")
+
 @app.get("/api/audio")
-def get_audio():
+async def get_audio():
     try:
         with open("temp_audio/news.json", "r", encoding="utf-8") as f:
             news_content = json.load(f)
@@ -177,7 +187,8 @@ def get_audio():
         output_jsonname = f"{safe_title[:50]}.json"
         audio_url = f"output/{urllib.parse.quote(output_mp3name)}"
         json_url = f"output/{output_jsonname}"
-        if os.path.exists(urllib.parse.unquote(audio_url)) and os.path.exists(json_url):
+        
+        if os.path.exists(f"output/{output_mp3name}") and os.path.exists(json_url):
             print("memory")
             with open(json_url, "r", encoding="utf-8") as f:
                 subtitle_blocks = json.load(f)
@@ -188,40 +199,85 @@ def get_audio():
                 "subtitles": subtitle_blocks
             }
 
-        # 3. Generate audio segments
-        # 4. Combine audio segments
+        # --- Step 1: Setup Concurrency Control ---
+        # Create a semaphore to limit concurrent Hakka TTS requests to avoid rate-limiting.
+        CONCURRENT_LIMIT = 3
+        semaphore = asyncio.Semaphore(CONCURRENT_LIMIT)
 
+        # --- Helper function to process each segment with semaphore control ---
+        async def process_segment(segment_func, *args):
+            # This wrapper acquires the semaphore before running the blocking I/O task in a thread.
+            async with semaphore:
+                # Using asyncio.to_thread to run the blocking function without blocking the event loop.
+                return await asyncio.to_thread(segment_func, *args)
 
+        # --- Step 2: Create all TTS generation tasks ---
+        tasks = []
+        all_seg_paths = [] # To maintain order for later audio combination
+        total_segments = sum(len(hakka_tts_module.split_smart_segments(p)) for p in news_content)
+        print(f"總共要處理 {total_segments} 個語音片段...")
+
+        for idx, paragraph in enumerate(news_content):
+            subsegments = hakka_tts_module.split_smart_segments(paragraph)
+            para_seg_paths = []
+            all_seg_paths.append(para_seg_paths)
+
+            for sub_idx, segment in enumerate(subsegments):
+                seg_index = f"{idx}_{sub_idx}"
+                task = None
+                try:
+                    # English segments (gTTS) are less likely to have strict rate limits,
+                    # but we can run them through the semaphore as well for consistency.
+                    if re.search(r'[a-zA-Z]', segment):
+                        out_path = f"temp_audio/segment_{seg_index}.mp3"
+                        # We use the same semaphore for gTTS to keep things simple.
+                        task = process_segment(generate_english_mp3, segment, out_path)
+                    # Hakka segments are the main reason for the semaphore.
+                    else:
+                        out_path = f"temp_audio/segment_{seg_index}.wav"
+                        task = process_segment(hakka_tts_module.generate_hakka_wav, segment, seg_index)
+
+                    para_seg_paths.append(out_path)
+                    if task:
+                        tasks.append(task)
+                except Exception as e:
+                    print(f"❌ 準備任務時發生錯誤 [{seg_index}]：{e}")
+
+        # --- Step 3: Run all tasks concurrently (respecting the semaphore limit) ---
+        print(f"▶️ 開始並行處理 {len(tasks)} 個語音生成任務 (並行上限: {CONCURRENT_LIMIT})...")
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        # Check for errors during execution
+        failed_tasks = 0
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                # Log the exception from the task
+                print(f"❌ 任務 {i} 執行失敗: {result}")
+                failed_tasks += 1
+        
+        if failed_tasks > 0:
+            print(f"⚠️ {failed_tasks}/{len(tasks)} 個語音生成任務失敗。")
+        else:
+            print("✅ 所有語音生成任務已完成。")
+
+        # --- Step 4: Combine audio segments and create subtitles ---
         final_audio = AudioSegment.empty()
         pause = AudioSegment.silent(duration=500)
         current_time = 0
         subtitle_blocks = []
-        total = len(news_content)
 
         for idx, paragraph in enumerate(news_content):
-            print(f"▶️ 正在處理第 {idx+1}/{total} 段（{(idx+1)/total:.1%}）...")
-
-            subsegments = hakka_tts_module.split_smart_segments(paragraph)
-            seg_paths = []
-
-            for sub_idx, segment in enumerate(subsegments):
-                seg_index = f"{idx}_{sub_idx}"
-                try:
-                    if re.search(r'[a-zA-Z]', segment):
-                        out_path = f"temp_audio/segment_{seg_index}.mp3"
-                        gTTS(text=segment, lang='en').save(out_path)
-                        print(f"🟢 gTTS 成功 ({seg_index})")
-                    else:
-                        out_path = f"temp_audio/segment_{seg_index}.wav"
-                        hakka_tts_module.generate_hakka_wav(segment, seg_index)
-                    seg_paths.append(out_path)
-                except Exception as e:
-                    print(f"❌ 語音產生失敗 [{seg_index}]：{e}")
-
-            # 合併整段段落的語音
             para_audio = AudioSegment.empty()
+            seg_paths = all_seg_paths[idx]
+
             for path in seg_paths:
-                para_audio += AudioSegment.from_file(path)
+                try:
+                    if os.path.exists(path) and os.path.getsize(path) > 0:
+                        para_audio += AudioSegment.from_file(path)
+                    else:
+                        print(f"⚠️ 找不到或檔案為空，跳過: {path}")
+                except Exception as e:
+                    print(f"❌ 合併音檔失敗 {path}: {e}")
 
             start_ms = current_time
             end_ms = current_time + len(para_audio)
@@ -232,36 +288,20 @@ def get_audio():
                 "text": paragraph
             })
             
-
             final_audio += para_audio + pause
             current_time = end_ms + len(pause)
 
-        # ===== 匯出合併音檔與字幕 =====
-        # safe_title = re.sub(r'[\\/*?:"<>|]', '', news_content[0])
-        # final_audio.export(f"output/{safe_title}.mp3", format="mp3")
-        
+        # --- Step 4: Export final audio and subtitle data ---
         with open(json_url, "w", encoding="utf-8") as f:
             json.dump(subtitle_blocks, f, ensure_ascii=False)
 
-        # with open(f"output/{safe_title}.srt", "w", encoding="utf-8") as f:
-        #     for block in subtitle_blocks:
-        #         f.write(f"{block['index']}\n")
-        #         f.write(f"{hakka_tts_module.to_srt_time(block['start'])} --> {hakka_tts_module.to_srt_time(block['end'])}\n")
-        #         f.write(f"{block['text']}\n\n")
-
-        # print(f"✅ 已輸出字幕：output/{safe_title}.srt")
-
-
-        
-        # 5. Export final audio and return data
         if len(final_audio) > 0:
-            safe_title = re.sub(r'[\/*?:"<>|]', "", news_content[0])
-            output_mp3name = f"{safe_title[:50]}.mp3"
             final_audio.export(f"output/{output_mp3name}", format="mp3")
-            print(f"✅ 已輸出語音：output/{output_mp3name}.mp3")
+            print(f"✅ 已輸出語音：output/{output_mp3name}")
             audio_url = f"/output/{urllib.parse.quote(output_mp3name)}"
         else:
             audio_url = None
+            print("⚠️ 最終音檔為空，不進行匯出。")
         
         return {
             "status": "done",
@@ -269,11 +309,11 @@ def get_audio():
             "subtitles": subtitle_blocks
         }
 
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching news: {e}")
     except Exception as e:
         # Log the full error for debugging
-        print(f"An unexpected error occurred: {e}")
+        print(f"An unexpected error occurred in get_audio: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
 @app.post("/api/translate", response_model=TranslationResponse)
