@@ -11,6 +11,7 @@
         :key="block.id"
         class="block"
         :class="{ 'active': index === activeIndex }"
+        @click="handleBlockClick(index)"
       >
         {{ block.text }}
       </div>
@@ -66,11 +67,10 @@ const activeIndex = ref(0);
 // 用於防止滾動過快
 const isScrolling = ref(false);
 
-// 計算整個 wrapper 的位移
+// 移除 wrapper 位移，改為顯示所有 blocks
 const wrapperStyle = computed(() => {
-  const blockHeight = 100 + 20; 
   return {
-    transform: `translateY(-${activeIndex.value * blockHeight}px)`,
+    transform: 'translateY(0px)',
   };
 });
 
@@ -81,6 +81,11 @@ const containerStyle = computed(() => ({
 
 // 計算當前啟用課程的路由
 const activeCourseRoute = computed(() => blocks.value[activeIndex.value].route);
+
+// 處理方塊點擊事件
+const handleBlockClick = (index) => {
+  activeIndex.value = index;
+};
 
 // 處理滑鼠滾輪事件
 const handleWheel = (event) => {
@@ -172,33 +177,48 @@ onUnmounted(() => {
   width: 200px;
   height: 100px;
   margin-bottom: 20px;
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   border-radius: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  transition: transform 0.5s ease-in-out, background-color 0.5s, border-color 0.5s;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.5s ease-in-out;
   transform-origin: left center;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   text-shadow: 
-    1px 1px 3px rgba(0, 0, 0, 0.8),
-    0 0 5px rgba(0, 0, 0, 0.5);
+    1px 1px 3px rgba(0, 0, 0, 0.6),
+    0 0 5px rgba(0, 0, 0, 0.3);
   text-align: center;
   line-height: 1.2;
+  cursor: pointer;
+}
+
+.block:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.85);
+  transform: scale(1.05);
 }
 
 .block.active {
-  transform: scale(1.2);
+  transform: scale(1.3);
   background-color: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.8);
   color: rgba(255, 255, 255, 0.95);
+  font-size: 18px;
+  font-weight: 600;
   text-shadow: 
     1px 1px 3px rgba(0, 0, 0, 0.8),
-    0 0 5px rgba(0, 0, 0, 0.4);
+    0 0 8px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+}
+
+.block.active:hover {
+  transform: scale(1.3);
 }
 
 /* 課程描述樣式 */
