@@ -175,6 +175,10 @@ watch(currentDayIndex, (newDayIndex) => {
   gap: 2rem;
   align-items: flex-start;
   padding-left: 2rem;
+  background-image: url('/images/goal_pic.jpg');
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
 }
 
 #workout-card {
