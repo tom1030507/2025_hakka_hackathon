@@ -10,7 +10,7 @@ const currentDayIndex = computed(() => parseInt(props.dayIndex));
 
 const displayDate = computed(() => {
   const dayNumber = currentDayIndex.value + 1;
-  return `Day${dayNumber < 10 ? '0' + dayNumber : dayNumber}`;
+  return `Day ${dayNumber < 10 ? '0' + dayNumber : dayNumber}`;
 });
 
 const activities = ref({
