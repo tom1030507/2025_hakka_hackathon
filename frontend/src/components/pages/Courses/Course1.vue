@@ -142,6 +142,9 @@ function showSection(section) {
 const isPlayingAudio = ref(false);
 const currentAudio = ref(null);
 
+//quiz data
+const hasClicked = ref(false);
+
 // Flashcard data and functions
 const cards = ref([
   { chinese: "你好", hakka: "你好" },
@@ -375,20 +378,22 @@ function generateQuizQuestion() {
 }
 
 function selectOption(option) {
-  quizOptions.value.forEach(opt => {
-    if (opt.isCorrect) {
+    quizOptions.value.forEach(opt => {
+    if (opt == option && opt.isCorrect) {
       opt.style = { backgroundColor: '#9cff9c' };
+      if (quizScore.value < currentQuizIndex.value + 1 && !hasClicked.value) {
+        hasClicked.value = true;
+        quizScore.value++;
+      }
     } else if (opt === option && !opt.isCorrect) {
+      hasClicked.value = true;
       opt.style = { backgroundColor: '#ff9c9c' };
     }
   });
-  
-  if (option.isCorrect) {
-    quizScore.value++;
-  }
 }
 
 function nextQuizQuestion() {
+  hasClicked.value = false;
   quizOptions.value.forEach(opt => {
     opt.style = {};
   });
