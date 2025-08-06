@@ -1,51 +1,53 @@
 <template>
-  <div class="course-container">
-    
-    <div class="header-controls">
-      <h1>客家新聞語音閱讀</h1>
-      <button @click="fetchNewsAndAudio" :disabled="loading" class="fetch-button">
-        <span v-if="loading">載入中，請稍候...</span>
-        <span v-else>讀取最新新聞</span>
+  <div class="page-wrapper">
+    <div class="course-container">
+      
+      <div class="header-controls">
+        <h1>客家新聞語音導讀 &nbsp; &nbsp; &nbsp; &nbsp;</h1>
+        <button @click="fetchNewsAndAudio" :disabled="loading" class="fetch-button">
+          <span v-if="loading">載入中，請稍候...</span>
+          <span v-else>讀取最新新聞</span>
 
-      </button>
-    </div>
-    
-    <div v-if="error" class="error-message">
-      <p>讀取時發生錯誤：</p>
-      <pre>{{ error }}</pre>
-    </div>
-
-    <div v-if="loading" class="loading-container">
-      <div class="spinner"></div>
-      <p>客語語音生成中，請稍候...</p>
-    </div>
-
-    <div v-if="newsContent.length > 0" class="content-container">
-      <div class="news-content">
-        <h2 :class="['h2', { active_h2: currentIndex === 0 }]">{{ newsContent[0] }}</h2>
-        <p v-for="(paragraph, index) in newsContent.slice(1)" :key="index" :class="['news-paragraph', { active: currentIndex-1 === index }]">
-          {{ paragraph }}
-        </p>
+        </button>
       </div>
-    </div>
-
-    <div v-if="audioUrl" class="audio-player-fixed-bottom">
-      <div class="audio-player-container">
-        <audio controls :src="fullAudioUrl" class="audio-player"
-          ref="audioRef"
-          @timeupdate="onTimeUpdate">
-          您的瀏覽器不支援音訊播放。
-        </audio>
-        
-        <a :href="fullAudioUrl" download class="download-link">下載音檔</a>
+      
+      <div v-if="error" class="error-message">
+        <p>讀取時發生錯誤：</p>
+        <pre>{{ error }}</pre>
       </div>
-    </div>
-    <div v-else-if="loading === false && newsContent.length > 0" class="audio-player-fixed-bottom">
-      <div class="audio-player-container">
-        <p>無法生成音檔，或音檔生成中發生錯誤。</p>
-      </div>
-    </div>
 
+      <div v-if="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>客語語音生成中，請稍候...</p>
+      </div>
+
+      <div v-if="newsContent.length > 0" class="content-container">
+        <div class="news-content">
+          <h2 :class="['h2', { active_h2: currentIndex === 0 }]">{{ newsContent[0] }}</h2>
+          <p v-for="(paragraph, index) in newsContent.slice(1)" :key="index" :class="['news-paragraph', { active: currentIndex-1 === index }]">
+            {{ paragraph }}
+          </p>
+        </div>
+      </div>
+
+      <div v-if="audioUrl" class="audio-player-fixed-bottom">
+        <div class="audio-player-container">
+          <audio controls :src="fullAudioUrl" class="audio-player"
+            ref="audioRef"
+            @timeupdate="onTimeUpdate">
+            您的瀏覽器不支援音訊播放。
+          </audio>
+          
+          <a :href="fullAudioUrl" download class="download-link">下載音檔</a>
+        </div>
+      </div>
+      <div v-else-if="loading === false && newsContent.length > 0" class="audio-player-fixed-bottom">
+        <div class="audio-player-container">
+          <p>無法生成音檔，或音檔生成中發生錯誤。</p>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>
 
@@ -116,11 +118,25 @@ function onTimeUpdate() {
 </script>
 
 <style scoped>
+.page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  background-image: url('./Course_background/Course1_page.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
 .course-container {
   max-width: 1000px;
   margin: 2rem auto;
-  padding: 2rem;
-  background-color: #f9f9f9;
+  padding: 4rem;
+  background-color: #f9f9f9; /* Fallback color */
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   font-family: 'Helvetica Neue', Arial, sans-serif;
