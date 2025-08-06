@@ -276,6 +276,6 @@ onUnmounted(() => {
 .course-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  background-color: #3a8a6e;
+  background-color: #aab5b1;
 }
 </style>
