@@ -63,7 +63,7 @@ const goToFeature = (feature) => {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  height: 50%;
+  height: 40%;
   width: 100%;
   max-width: 900px; /* or any other size */
   z-index: 3;
@@ -120,6 +120,7 @@ const goToFeature = (feature) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform: translateY(60px);
 }
 
 .main-title {
