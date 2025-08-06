@@ -2,7 +2,7 @@
   <div class="cover-container">
     <div class="top-images-container">
       <img src="/images/white_pic.png" alt="Background Image" class="top-image background-image">
-      <img src="/images/title_pic.png" alt="Title Image" class="top-image foreground-image">
+      <img src="/images/title_pic.png" alt="Title Image" class="title-image foreground-image">
     </div>
     <div class="content">
       <h1 class="main-title"></h1>
@@ -63,10 +63,21 @@ const goToFeature = (feature) => {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
+  height: 50%;
   width: 100%;
-  max-width: 500px; /* or any other size */
+  max-width: 900px; /* or any other size */
   z-index: 3;
-  opacity: 0.5;
+  opacity: 0.7;
+}
+
+.title-image {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 800px; /* or any other size */
+  z-index: 3;
 }
 
 .cover-container {
