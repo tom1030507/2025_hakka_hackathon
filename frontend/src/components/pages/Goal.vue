@@ -10,7 +10,7 @@ const currentDayIndex = computed(() => parseInt(props.dayIndex));
 
 const displayDate = computed(() => {
   const dayNumber = currentDayIndex.value + 1;
-  return `Day${dayNumber < 10 ? '0' + dayNumber : dayNumber}`;
+  return `Day ${dayNumber < 10 ? '0' + dayNumber : dayNumber}`;
 });
 
 const activities = ref({
@@ -175,6 +175,11 @@ watch(currentDayIndex, (newDayIndex) => {
   gap: 2rem;
   align-items: flex-start;
   padding-left: 2rem;
+  padding-top: 1rem;
+  background-image: url('/images/goal_pic.jpg');
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
 }
 
 #workout-card {

@@ -244,26 +244,38 @@ onUnmounted(() => {
   align-items: center;
 }
 
-/* 課程按鈕樣式 */
+/* 課程按鈕樣式 - 白色半透明 */
 .course-button {
   position: absolute;
   bottom: 150px;
   right: 100px;
   z-index: 10;
   padding: 15px 30px;
-  background-color: #42b983;
+  
+  /* 核心：白色半透明背景 + 毛玻璃效果 */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* 支援 Safari */
+  
+  /* 邊框：增加輪廓感 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  /* 文字：維持白色，但加上深色陰影以提高對比度 */
   color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+
   text-decoration: none;
   border-radius: 50px;
   font-size: 18px;
   font-weight: bold;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   transition: all 0.3s ease;
 }
+
 
 .course-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  background-color: #3a8a6e;
+  background-color: #aab5b1;
 }
 </style>

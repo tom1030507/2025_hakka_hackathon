@@ -1,8 +1,12 @@
 <template>
   <div class="cover-container">
+    <div class="top-images-container">
+      <img src="/images/white_pic.png" alt="Background Image" class="top-image background-image">
+      <img src="/images/title_pic.png" alt="Title Image" class="title-image foreground-image">
+    </div>
     <div class="content">
-      <h1 class="main-title">歡迎您的蒞臨</h1>
-      <p class="subtitle">探索為您量身打造的客語學習管道</p>
+      <h1 class="main-title"></h1>
+      <p class="subtitle"></p>
 
       <div class="courses-grid">
         <button 
@@ -54,6 +58,28 @@ const goToFeature = (feature) => {
 </script>
 
 <style scoped>
+.top-image {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 40%;
+  width: 100%;
+  max-width: 900px; /* or any other size */
+  z-index: 3;
+  opacity: 0.7;
+}
+
+.title-image {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 800px; /* or any other size */
+  z-index: 3;
+}
+
 .cover-container {
   position: relative;
   height: 100vh;
@@ -94,6 +120,7 @@ const goToFeature = (feature) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  transform: translateY(60px);
 }
 
 .main-title {
@@ -135,17 +162,28 @@ const goToFeature = (feature) => {
   align-items: center;
 }
 
+/* 按鈕改成白色 */
 .cta-button {
-  background: linear-gradient(135deg, #42b983, #3a8a6e);
+  /* 核心：白色半透明背景 + 毛玻璃效果 */
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* 支援 Safari */
+  
+  /* 邊框：增加輪廓感 */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  
+  /* 文字：維持白色，但加上深色陰影以提高對比度 */
   color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  
+  /* 其他既有樣式 */
   padding: 25px 50px;
-  border: none;
   border-radius: 50px;
   font-size: 1.5rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(66, 185, 131, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   animation: fadeInUp 1s ease-out 0.9s both;
   width: 100%;
   max-width: 400px;
@@ -154,11 +192,17 @@ const goToFeature = (feature) => {
   align-items: center;
 }
 
+/* 按鈕改成白色 */
 .cta-button:hover {
+  /* 滑鼠懸停時，提高亮度和邊框清晰度 */
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  
+  /* 讓陰影更明顯 */
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(66, 185, 131, 0.4);
-  background: linear-gradient(135deg, #3a8a6e, #2d6b56);
 }
+
 
 .arrow {
   font-size: 1.6rem;

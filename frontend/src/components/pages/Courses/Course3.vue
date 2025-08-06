@@ -345,12 +345,12 @@ const resetCourse = () => {
 /* Main Container */
 .course-container {
   width: 100%;
-  height: calc(100vh - 140px); /* 扣除header(約60px)、border(1px)、padding(2rem=32px)等空間 */
-  min-height: 450px; /* 最小高度保證可用性 */
-  max-height: calc(100vh - 140px); /* 防止超出視窗 */
-  background-color: #f9f9f9;
+  min-height: calc(279vh - 1400px); /* 保持最小高度，但允許擴展 */
+  background-image: url('./Course_background/Course3_page.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* 固定背景，避免滾動 */
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -366,7 +366,7 @@ const resetCourse = () => {
   justify-content: center;
   align-items: center;
   padding: 1.5rem;
-  background-color: #f8f9fa;
+  background-color: transparent;
   color: #2c3e50;
   position: relative;
   overflow: hidden;
@@ -394,7 +394,7 @@ const resetCourse = () => {
 .initial-screen .course-header h1 {
   font-size: 2.2rem;
   margin: 0 0 0.8rem 0;
-  color: #2c3e50;
+  color: rgb(3, 3, 3);
   font-weight: 700;
   letter-spacing: -0.5px;
   text-align: center;
