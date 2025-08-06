@@ -1,8 +1,12 @@
 <template>
   <div class="cover-container">
+    <div class="top-images-container">
+      <img src="/images/white_pic.png" alt="Background Image" class="top-image background-image">
+      <img src="/images/title_pic.png" alt="Title Image" class="top-image foreground-image">
+    </div>
     <div class="content">
-      <h1 class="main-title">歡迎您的蒞臨</h1>
-      <p class="subtitle">探索為您量身打造的客語學習管道</p>
+      <h1 class="main-title"></h1>
+      <p class="subtitle"></p>
 
       <div class="courses-grid">
         <button 
@@ -54,6 +58,17 @@ const goToFeature = (feature) => {
 </script>
 
 <style scoped>
+.top-image {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 500px; /* or any other size */
+  z-index: 3;
+  opacity: 0.5;
+}
+
 .cover-container {
   position: relative;
   height: 100vh;
