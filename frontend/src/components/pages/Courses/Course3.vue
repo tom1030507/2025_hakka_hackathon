@@ -13,7 +13,7 @@
           <textarea 
             id="topic-input"
             v-model="inputValue" 
-            placeholder="例如：客家文化、客語語法、客家歷史等..."
+            placeholder="例如：客家文化、客家歷史、小六數學等..."
             class="input-field"
             rows="3"
             @keydown.enter.prevent="submitInput"
@@ -86,6 +86,20 @@
         <h1>{{ inputValue }} - 學習課程</h1>
         <div class="course-controls">
           <button @click="resetCourse" class="reset-button">重新開始</button>
+          <div class="language-toggle">
+            <button 
+              @click="toggleLanguage"
+              :disabled="translating"
+              class="lang-button"
+              :class="{ 'translating': translating }"
+            >
+              <span v-if="!translating">{{ isHakka ? '中文' : '客語' }}</span>
+              <span v-else class="translating-text">
+                <span class="spinner"></span>
+                翻譯中...
+              </span>
+            </button>
+          </div>
           <div class="progress-indicator">
             {{ currentPage + 1 }} / {{ courses.length }} 章節
           </div>
@@ -199,6 +213,9 @@ const inputValue = ref(''); // New ref for input field
 const generatingCourse = ref(false); // Loading state for course generation
 const selectedDifficulty = ref('intermediate'); // Default to intermediate
 const includeQuiz = ref(true); // Default to include quiz
+const isHakka = ref(false); // 控制當前顯示語言
+const hakkaContent = ref({}); // 存儲翻譯後的內容 {pageIndex: translatedText}
+const translating = ref(false); // 翻譯狀態
 
 onMounted(async () => {
   try {
@@ -230,6 +247,13 @@ const courseOutlines = computed(() => {
 const renderedMarkdown = computed(() => {
   if (currentCourse.value && currentCourse.value.text) {
     marked.setOptions({ breaks: true });
+    
+    // 如果是客語模式且有翻譯內容，顯示翻譯版本
+    if (isHakka.value && hakkaContent.value[currentPage.value]) {
+      return marked(hakkaContent.value[currentPage.value]);
+    }
+    
+    // 否則顯示原文
     return marked(currentCourse.value.text);
   }
   return '';
@@ -337,7 +361,63 @@ const resetCourse = () => {
   generatingCourse.value = false;
   selectedDifficulty.value = 'intermediate';
   includeQuiz.value = true;
+  isHakka.value = false;
+  hakkaContent.value = {};
+  translating.value = false;
   resetQuizState();
+};
+
+// 語言切換函數
+const toggleLanguage = async () => {
+  if (translating.value) return;
+  
+  // 如果切換到客語模式且當前頁面還沒翻譯，則進行翻譯
+  if (!isHakka.value && !hakkaContent.value[currentPage.value]) {
+    await translateCurrentPage();
+  }
+  
+  // 切換語言
+  isHakka.value = !isHakka.value;
+};
+
+// 翻譯當前頁面內容
+const translateCurrentPage = async () => {
+  if (!currentCourse.value || translating.value) return;
+  
+  translating.value = true;
+  
+  try {
+    const response = await fetch('http://localhost:8000/api/translate/course', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: currentCourse.value.text,
+        index: currentPage.value
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.success && result.translatedText) {
+      // 存儲翻譯結果
+      hakkaContent.value[currentPage.value] = result.translatedText;
+    } else {
+      console.error('翻譯失敗:', result.error_message || '未知錯誤');
+      alert('翻譯失敗，請稍後再試');
+    }
+    
+  } catch (error) {
+    console.error('翻譯API調用失敗:', error);
+    alert('翻譯服務暫時不可用，請稍後再試');
+  } finally {
+    translating.value = false;
+  }
 };
 </script>
 
@@ -1351,5 +1431,66 @@ const resetCourse = () => {
 .course-main-content::-webkit-scrollbar-thumb:hover,
 .outline-sidebar::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* Language Toggle Styles */
+.language-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.lang-button {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 70px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.lang-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.lang-button:disabled {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.lang-button.translating {
+  background: linear-gradient(135deg, #fd7e14 0%, #e67e22 100%);
+}
+
+.translating-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

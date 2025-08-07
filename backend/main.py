@@ -115,6 +115,15 @@ class TTSRequest(BaseModel):
     text: str
     voice_type: str = "hakka"
 
+class CourseTranslateRequest(BaseModel):
+    text: str
+    index: int
+
+class CourseTranslateResponse(BaseModel):
+    success: bool
+    translatedText: str = None
+    error_message: str = None
+
 class TTSResponse(BaseModel):
     success: bool
     audio_url: str = None
@@ -315,6 +324,45 @@ async def get_audio():
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+
+@app.post("/api/translate/course", response_model=CourseTranslateResponse)
+async def translate_course_text(request: CourseTranslateRequest):
+    """專為Course3.vue設計的翻譯API端點"""
+    try:
+        # 調用翻譯模組（新版本支持 Markdown 格式保留）
+        translation_result = hakka_trans_module.hakka_translate(request.text, str(request.index))
+        
+        if translation_result and translation_result.get('success', False):
+            # 提取翻譯後的文字（優先使用 translatedText，向後兼容 output）
+            translated_text = translation_result.get('translatedText') or translation_result.get('output', '')
+            if translated_text:
+                return CourseTranslateResponse(
+                    success=True,
+                    translatedText=translated_text
+                )
+            else:
+                return CourseTranslateResponse(
+                    success=False,
+                    error_message="翻譯結果為空"
+                )
+        else:
+            error_msg = translation_result.get('error_message', '翻譯服務返回格式錯誤') if translation_result else '翻譯服務返回格式錯誤'
+            return CourseTranslateResponse(
+                success=False,
+                error_message=error_msg
+            )
+            
+    except RuntimeError as e:
+        return CourseTranslateResponse(
+            success=False,
+            error_message=str(e)
+        )
+    except Exception as e:
+        print(f"Course translation error: {e}")
+        return CourseTranslateResponse(
+            success=False,
+            error_message=f"翻譯失敗: {str(e)}"
+        )
 
 @app.post("/api/translate", response_model=TranslationResponse)
 async def translate_text(request: TranslationRequest):
