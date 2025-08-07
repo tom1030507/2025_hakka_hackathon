@@ -143,21 +143,23 @@
                 </p>
                 <div class="options">
                   <div v-for="(optionText, optionKey) in quiz.options" :key="optionKey" class="option">
-                    <input
-                      type="radio"
-                      :id="`p${currentPage}_q${quiz.question_number}_${optionKey}`"
-                      :name="`page${currentPage}_question_${quiz.question_number}`"
-                      :value="optionKey"
-                      v-model="userAnswers[index]"
+                    <button
+                      type="button"
+                      :class="{
+                        'option-button': true,
+                        'selected': userAnswers[index] === optionKey,
+                        'correct': submitted && optionKey === quiz.correct_answer,
+                        'incorrect': submitted && userAnswers[index] === optionKey && optionKey !== quiz.correct_answer,
+                        'disabled': submitted
+                      }"
+                      @click="!submitted && (userAnswers[index] = optionKey)"
                       :disabled="submitted"
-                    />
-                    <label :for="`p${currentPage}_q${quiz.question_number}_${optionKey}`" 
-                           :class="{ 
-                             'correct': submitted && optionKey === quiz.correct_answer,
-                             'incorrect': submitted && userAnswers[index] === optionKey && optionKey !== quiz.correct_answer
-                           }">
-                      {{ optionKey }}: {{ optionText }}
-                    </label>
+                    >
+                      <span class="option-letter">{{ optionKey }}</span>
+                      <span class="option-text">{{ optionText }}</span>
+                      <span v-if="submitted && optionKey === quiz.correct_answer" class="check-icon">✓</span>
+                      <span v-else-if="submitted && userAnswers[index] === optionKey && optionKey !== quiz.correct_answer" class="cross-icon">✗</span>
+                    </button>
                   </div>
                 </div>
                 <div v-if="submitted" class="feedback" :class="{
@@ -1066,38 +1068,101 @@ const translateCurrentPage = async () => {
   margin-bottom: 0.8rem;
 }
 
-.option label {
+/* New Option Button Styles */
+.option-button {
   display: flex;
   align-items: center;
-  padding: 0.8rem;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
   background-color: white;
   border: 2px solid #e9ecef;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   font-size: 1rem;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
 }
 
-.option label:hover {
+.option-button:hover:not(.disabled) {
   border-color: #667eea;
   background-color: #f8f9ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
-.option input[type="radio"] {
-  margin-right: 0.8rem;
-  transform: scale(1.2);
+.option-button.selected {
+  border-color: #667eea;
+  background-color: #f0f4ff;
+  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
 }
 
-.option label.correct {
+.option-button.correct {
   background-color: #d4edda;
   border-color: #28a745;
   color: #155724;
 }
 
-.option label.incorrect {
+.option-button.incorrect {
   background-color: #f8d7da;
   border-color: #dc3545;
   color: #721c24;
+}
+
+.option-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.option-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #667eea;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.option-button.selected .option-letter {
+  background-color: #5a67d8;
+}
+
+.option-button.correct .option-letter {
+  background-color: #28a745;
+}
+
+.option-button.incorrect .option-letter {
+  background-color: #dc3545;
+}
+
+.option-text {
+  flex: 1;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.check-icon,
+.cross-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.check-icon {
+  color: #28a745;
+}
+
+.cross-icon {
+  color: #dc3545;
 }
 
 .feedback {
