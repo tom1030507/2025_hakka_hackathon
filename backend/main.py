@@ -12,6 +12,7 @@ from pydub import AudioSegment
 import urllib.parse
 from dotenv import load_dotenv
 from datetime import timedelta
+from course_generator import CourseRequest, course_generator
 import hakka_tts_module
 import hakka_trans_module
 import json
@@ -550,6 +551,38 @@ def clear_translation_files():
         return {"message": "Translation files cleared successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error clearing files: {str(e)}")
+
+@app.post("/api/generate_course")
+async def generate_course(request: CourseRequest):
+    """
+    生成課程內容的 API 端點
+    
+    Args:
+        request: 包含 topic (主題), difficulty (難度), includeQuiz (是否包含測驗) 的請求
+        
+    Returns:
+        課程數據列表
+    """
+    try:
+        print(f"收到課程生成請求: topic={request.topic}, difficulty={request.difficulty}, includeQuiz={request.includeQuiz}")
+        
+        # 調用課程生成模組
+        course_data = await course_generator.generate_course(request)
+        
+        print(f"課程生成完成，包含 {len(course_data)} 個章節")
+        
+        return {
+            "success": True,
+            "message": "課程生成成功",
+            "data": course_data
+        }
+        
+    except Exception as e:
+        print(f"課程生成失敗: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"課程生成失敗: {str(e)}"
+        )
 
 @app.get("/")
 def read_root():
